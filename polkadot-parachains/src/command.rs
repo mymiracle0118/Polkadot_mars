@@ -130,7 +130,7 @@ fn load_spec(
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"Polkadot collator".into()
+		"Ares Parachain Collator".into()
 	}
 
 	fn impl_version() -> String {
