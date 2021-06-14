@@ -64,8 +64,8 @@ pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId where
 
 pub fn get_chain_spec(id: ParaId) -> ChainSpec {
 	ChainSpec::from_genesis(
-		"Local Testnet",
-		"local_testnet",
+		"Ares PC1",
+		"ares_pc1",
 		ChainType::Local,
 		move || {
 			testnet_genesis(
