@@ -46,7 +46,7 @@ use frame_system::{ensure_none, ensure_root};
 use polkadot_parachain::primitives::RelayChainBlockNumber;
 use relay_state_snapshot::MessagingStateSnapshot;
 use sp_runtime::{
-	traits::{BlakeTwo256, Block as BlockT, Hash},
+	traits::{BlakeTwo256, Block as BlockT, Hash, BlockNumberProvider},
 	transaction_validity::{
 		InvalidTransaction, TransactionLongevity, TransactionSource, TransactionValidity,
 		ValidTransaction,
@@ -373,7 +373,7 @@ pub mod pallet {
 		}
 
 		#[pallet::weight((1_000, DispatchClass::Operational))]
-		fn sudo_send_upward_message(
+		pub fn sudo_send_upward_message(
 			origin: OriginFor<T>,
 			message: UpwardMessage,
 		) -> DispatchResult {
@@ -383,7 +383,7 @@ pub mod pallet {
 		}
 
 		#[pallet::weight((1_000_000, DispatchClass::Operational))]
-		fn authorize_upgrade(origin: OriginFor<T>, code_hash: T::Hash) -> DispatchResult {
+		pub fn authorize_upgrade(origin: OriginFor<T>, code_hash: T::Hash) -> DispatchResult {
 			ensure_root(origin)?;
 
 			AuthorizedUpgrade::<T>::put(&code_hash);
@@ -393,7 +393,7 @@ pub mod pallet {
 		}
 
 		#[pallet::weight(1_000_000)]
-		fn enact_authorized_upgrade(_: OriginFor<T>, code: Vec<u8>) -> DispatchResultWithPostInfo {
+		pub fn enact_authorized_upgrade(_: OriginFor<T>, code: Vec<u8>) -> DispatchResultWithPostInfo {
 			Self::validate_authorized_upgrade(&code[..])?;
 			Self::set_code_impl(code)?;
 			AuthorizedUpgrade::<T>::kill();
@@ -595,6 +595,29 @@ pub mod pallet {
 			sp_io::storage::set(b":c", &[]);
 		}
 	}
+
+	#[pallet::validate_unsigned]
+	impl<T: Config> sp_runtime::traits::ValidateUnsigned for Pallet<T> {
+		type Call = Call<T>;
+	
+		fn validate_unsigned(_source: TransactionSource, call: &Self::Call) -> TransactionValidity {
+			if let Call::enact_authorized_upgrade(ref code) = call {
+				if let Ok(hash) = Self::validate_authorized_upgrade(code) {
+					return Ok(ValidTransaction {
+						priority: 100,
+						requires: vec![],
+						provides: vec![hash.as_ref().to_vec()],
+						longevity: TransactionLongevity::max_value(),
+						propagate: true,
+					});
+				}
+			}
+			if let Call::set_validation_data(..) = call {
+				return Ok(Default::default());
+			}
+			Err(InvalidTransaction::Call.into())
+		}
+	}
 }
 
 impl<T: Config> Pallet<T> {
@@ -603,28 +626,6 @@ impl<T: Config> Pallet<T> {
 		let actual_hash = T::Hashing::hash(&code[..]);
 		ensure!(actual_hash == required_hash, Error::<T>::Unauthorized);
 		Ok(actual_hash)
-	}
-}
-
-impl<T: Config> sp_runtime::traits::ValidateUnsigned for Pallet<T> {
-	type Call = Call<T>;
-
-	fn validate_unsigned(_source: TransactionSource, call: &Self::Call) -> TransactionValidity {
-		if let Call::enact_authorized_upgrade(ref code) = call {
-			if let Ok(hash) = Self::validate_authorized_upgrade(code) {
-				return Ok(ValidTransaction {
-					priority: 100,
-					requires: vec![],
-					provides: vec![hash.as_ref().to_vec()],
-					longevity: TransactionLongevity::max_value(),
-					propagate: true,
-				});
-			}
-		}
-		if let Call::set_validation_data(..) = call {
-			return Ok(Default::default());
-		}
-		Err(InvalidTransaction::Call.into())
 	}
 }
 
@@ -1034,7 +1035,22 @@ pub trait CheckInherents<Block: BlockT> {
 	/// This function gets passed all the extrinsics of the block, so it is up to the callee to
 	/// identify the inherents. The `validation_data` can be used to access the
 	fn check_inherents(
-		extrinsics: &[Block::Extrinsic],
+		block: &Block,
 		validation_data: &RelayChainStateProof,
 	) -> frame_support::inherent::CheckInherentsResult;
+}
+
+/// Implements [`BlockNumberProvider`] that returns relaychain block number fetched from
+/// validation data.
+/// NTOE: When validation data is not available (e.g. within on_initialize), 0 will be returned.
+pub struct RelaychainBlockNumberProvider<T>(sp_std::marker::PhantomData<T>);
+
+impl<T: Config> BlockNumberProvider for RelaychainBlockNumberProvider<T> {
+	type BlockNumber = relay_chain::BlockNumber;
+
+	fn current_block_number() -> relay_chain::BlockNumber {
+		Pallet::<T>::validation_data()
+			.map(|d| d.relay_parent_number)
+			.unwrap_or_default()
+	}
 }

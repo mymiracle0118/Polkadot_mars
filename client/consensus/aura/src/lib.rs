@@ -33,13 +33,14 @@ use cumulus_primitives_core::{
 use futures::lock::Mutex;
 use polkadot_client::ClientHandle;
 use sc_client_api::{backend::AuxStore, Backend, BlockOf};
+use sc_consensus::BlockImport;
 use sc_consensus_slots::{BackoffAuthoringBlocksStrategy, SlotInfo};
 use sc_telemetry::TelemetryHandle;
 use sp_api::ProvideRuntimeApi;
 use sp_application_crypto::AppPublic;
 use sp_blockchain::{HeaderBackend, ProvideCache};
 use sp_consensus::{
-	BlockImport, EnableProofRecording, Environment, ProofRecording, Proposer, SlotData, SyncOracle,
+	EnableProofRecording, Environment, ProofRecording, Proposer, SlotData, SyncOracle,
 };
 use sp_consensus_aura::AuraApi;
 use sp_core::crypto::Pair;
@@ -52,8 +53,7 @@ mod import_queue;
 
 pub use import_queue::{build_verifier, import_queue, BuildVerifierParams, ImportQueueParams};
 pub use sc_consensus_aura::{
-	slot_duration, AuraVerifier, BuildAuraWorkerParams, SlotDuration,
-	SlotProportion,
+	slot_duration, AuraVerifier, BuildAuraWorkerParams, SlotDuration, SlotProportion,
 };
 pub use sc_consensus_slots::InherentDataProviderExt;
 
@@ -110,6 +110,7 @@ where
 		slot_duration: SlotDuration,
 		telemetry: Option<TelemetryHandle>,
 		block_proposal_slot_portion: SlotProportion,
+		max_block_proposal_slot_portion: Option<SlotProportion>,
 	) -> Self
 	where
 		Client: ProvideRuntimeApi<B>
@@ -137,8 +138,8 @@ where
 		P::Public: AppPublic + Hash + Member + Encode + Decode,
 		P::Signature: TryFrom<Vec<u8>> + Hash + Member + Encode + Decode,
 	{
-		let worker =
-			sc_consensus_aura::build_aura_worker::<P, _, _, _, _, _, _, _, _>(BuildAuraWorkerParams {
+		let worker = sc_consensus_aura::build_aura_worker::<P, _, _, _, _, _, _, _, _>(
+			BuildAuraWorkerParams {
 				client: para_client,
 				block_import: ParachainBlockImport::new(block_import),
 				justification_sync_link: (),
@@ -149,7 +150,9 @@ where
 				keystore,
 				telemetry,
 				block_proposal_slot_portion,
-			});
+				max_block_proposal_slot_portion,
+			},
+		);
 
 		Self {
 			create_inherent_data_providers: Arc::new(create_inherent_data_providers),
@@ -253,6 +256,7 @@ pub struct BuildAuraConsensusParams<PF, BI, RBackend, CIDP, Client, BS, SO> {
 	pub slot_duration: SlotDuration,
 	pub telemetry: Option<TelemetryHandle>,
 	pub block_proposal_slot_portion: SlotProportion,
+	pub max_block_proposal_slot_portion: Option<SlotProportion>,
 }
 
 /// Build the [`AuraConsensus`].
@@ -273,6 +277,7 @@ pub fn build_aura_consensus<P, Block, PF, BI, RBackend, CIDP, Client, SO, BS, Er
 		slot_duration,
 		telemetry,
 		block_proposal_slot_portion,
+		max_block_proposal_slot_portion,
 	}: BuildAuraConsensusParams<PF, BI, RBackend, CIDP, Client, BS, SO>,
 ) -> Box<dyn ParachainConsensus<Block>>
 where
@@ -327,6 +332,7 @@ where
 		slot_duration,
 		telemetry,
 		block_proposal_slot_portion,
+		max_block_proposal_slot_portion,
 	)
 	.build()
 }
@@ -352,6 +358,7 @@ struct AuraConsensusBuilder<P, Block, PF, BI, RBackend, CIDP, Client, SO, BS, Er
 	slot_duration: SlotDuration,
 	telemetry: Option<TelemetryHandle>,
 	block_proposal_slot_portion: SlotProportion,
+	max_block_proposal_slot_portion: Option<SlotProportion>,
 }
 
 impl<Block, PF, BI, RBackend, CIDP, Client, SO, BS, P, Error>
@@ -409,6 +416,7 @@ where
 		slot_duration: SlotDuration,
 		telemetry: Option<TelemetryHandle>,
 		block_proposal_slot_portion: SlotProportion,
+		max_block_proposal_slot_portion: Option<SlotProportion>,
 	) -> Self {
 		Self {
 			_phantom: PhantomData,
@@ -425,6 +433,7 @@ where
 			slot_duration,
 			telemetry,
 			block_proposal_slot_portion,
+			max_block_proposal_slot_portion,
 		}
 	}
 
@@ -498,6 +507,7 @@ where
 			self.slot_duration,
 			self.telemetry,
 			self.block_proposal_slot_portion,
+			self.max_block_proposal_slot_portion,
 		))
 	}
 }
