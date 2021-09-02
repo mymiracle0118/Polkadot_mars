@@ -406,6 +406,29 @@ impl cumulus_ping::Config for Runtime {
 }
 
 parameter_types! {
+	pub const BridgePalletID: u8 = 100;
+	pub const BridgeMethodID: u8 = 0;
+	pub const BridgeWeightAtMost: u64 = 1000;
+}
+
+impl pallet_getprice::Config for Runtime {
+	type Event = Event;
+	type Origin = Origin;
+	type Call = Call;
+	type XcmSender = XcmRouter;
+	type BridgePalletID = BridgePalletID;
+	type BridgeMethodID = BridgeMethodID;
+	type BridgeWeightAtMost = BridgeWeightAtMost;
+}
+
+impl pallet_bridge::Config for Runtime {
+	type Event = Event;
+	type Origin = Origin;
+	type Call = Call;
+	type XcmSender = XcmRouter;
+}
+
+parameter_types! {
 	pub const AssetDeposit: Balance = 1 * ROC;
 	pub const ApprovalDeposit: Balance = 100 * MILLIROC;
 	pub const AssetsStringLimit: u32 = 50;
@@ -468,6 +491,8 @@ construct_runtime! {
 		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 53,
 
 		Spambot: cumulus_ping::{Pallet, Call, Storage, Event<T>} = 99,
+		Bridge: pallet_bridge::{Pallet, Call, Storage, Event<T>} = 100,
+		GetPrice: pallet_getprice::{Pallet, Call, Storage, Event<T>} = 101,
 	}
 }
 
