@@ -336,7 +336,8 @@ pub type Barrier = (
 	TakeWeightCredit,
 	AllowTopLevelPaidExecutionFrom<Everything>,
 	AllowUnpaidExecutionFrom<ParentOrParentsUnitPlurality>,
-	AllowUnpaidExecutionFrom<SpecParachain>,
+	AllowUnpaidExecutionFrom<Everything>,
+	//AllowUnpaidExecutionFrom<SpecParachain>,
 	// ^^^ Parent & its unit plurality gets free execution
 );
 
