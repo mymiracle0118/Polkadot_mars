@@ -111,8 +111,8 @@ fn load_spec(
 			&include_bytes!("../res/westmint.json")[..],
 		)?),
 		"mars" => Box::new(chain_spec::staging_test_net(para_id)),
-		// "" => Box::new(chain_spec::get_chain_spec(para_id)),
-		"" => Box::new(chain_spec::staging_test_net(para_id)),
+		"" => Box::new(chain_spec::get_chain_spec(para_id)),
+		// "" => Box::new(chain_spec::staging_test_net(para_id)),
 		path => {
 			let chain_spec = chain_spec::ChainSpec::from_json_file(path.into())?;
 			if chain_spec.is_statemint() {

@@ -23,6 +23,10 @@ use serde::{Deserialize, Serialize};
 use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
+use rococo_parachain_runtime::{
+	CouncilConfig,TechnicalCommitteeConfig,DemocracyConfig,
+};
+
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<rococo_parachain_runtime::GenesisConfig, Extensions>;
 
@@ -226,6 +230,17 @@ fn testnet_genesis(
 				.collect(),
 
 		},
+		democracy: DemocracyConfig::default(),
+		council: CouncilConfig::default(),
+		technical_committee: TechnicalCommitteeConfig {
+			members: endowed_accounts
+				.iter()
+				.take((endowed_accounts.len() + 1) / 2)
+				.cloned()
+				.collect(),
+			phantom: Default::default(),
+		},
+		treasury: Default::default(),
 		aura: Default::default(),
 		aura_ext: Default::default(),
 		parachain_system: Default::default(),

@@ -66,14 +66,22 @@ use xcm_builder::{
 };
 use xcm_executor::{Config, XcmExecutor};
 
+
+
 pub mod constants;
-use constants::{currency::*};
+use constants::{currency::*, time::*};
 // use constants::currency::AMAS_UNITS;//{AMAS_UNITS, AMAS_CENTS, AMAS_MILLI_UNITS, AMAS_MILLICENTS};
 
 mod weights;
+mod part_utility;
 mod part_authorship;
 mod part_session_and_collatorselection;
 mod part_ocw;
+mod part_collective;
+mod part_treasury;
+mod part_bounties;
+mod part_democracy;
+mod part_scheduler;
 
 pub type SessionHandlers = ();
 
@@ -220,6 +228,10 @@ parameter_types! {
 	pub const MaxLocks: u32 = 50;
 	pub const MaxReserves: u32 = 50;
 }
+
+// ---- -
+
+// --- -
 
 impl pallet_balances::Config for Runtime {
 	/// The type for recording an account's balance.
@@ -451,6 +463,7 @@ construct_runtime! {
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system::{Pallet, Call, Storage, Config, Event<T>},
+		Utility: pallet_utility::{Pallet, Call, Event},
 		Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
 		Sudo: pallet_sudo::{Pallet, Call, Storage, Config<T>, Event<T>},
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage},
@@ -471,9 +484,13 @@ construct_runtime! {
 		Aura: pallet_aura::{Pallet, Storage, Config<T>},
 		AuraExt: cumulus_pallet_aura_ext::{Pallet, Storage, Config},
 
-		// Aura: pallet_aura::{Pallet, Config<T>},
-		// AuraExt: cumulus_pallet_aura_ext::{Pallet, Config},
-
+		// Governance
+		Democracy: pallet_democracy::{Pallet, Call, Storage, Config<T>, Event<T>},
+		Council: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
+		TechnicalCommittee: pallet_collective::<Instance2>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
+		Treasury: pallet_treasury::{Pallet, Call, Storage, Config, Event<T>},
+		Bounties: pallet_bounties::{Pallet, Call, Storage, Event<T>},
+		Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>},
 
 		// XCM helpers.
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 50,
