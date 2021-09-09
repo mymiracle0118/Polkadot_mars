@@ -110,7 +110,9 @@ fn load_spec(
 		"westmint" => Box::new(chain_spec::ChainSpec::from_json_bytes(
 			&include_bytes!("../res/westmint.json")[..],
 		)?),
-		"" => Box::new(chain_spec::get_chain_spec(para_id)),
+		"mars" => Box::new(chain_spec::staging_test_net(para_id)),
+		// "" => Box::new(chain_spec::get_chain_spec(para_id)),
+		"" => Box::new(chain_spec::staging_test_net(para_id)),
 		path => {
 			let chain_spec = chain_spec::ChainSpec::from_json_file(path.into())?;
 			if chain_spec.is_statemint() {
@@ -130,7 +132,7 @@ fn load_spec(
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"Ares Parachain Collator".into()
+		"Polkadot collator".into()
 	}
 
 	fn impl_version() -> String {
@@ -581,6 +583,10 @@ impl CliConfiguration<Self> for RelayChainCli {
 
 	fn rpc_cors(&self, is_dev: bool) -> Result<Option<Vec<String>>> {
 		self.base.base.rpc_cors(is_dev)
+	}
+
+	fn telemetry_external_transport(&self) -> Result<Option<sc_service::config::ExtTransport>> {
+		self.base.base.telemetry_external_transport()
 	}
 
 	fn default_heap_pages(&self) -> Result<Option<u64>> {

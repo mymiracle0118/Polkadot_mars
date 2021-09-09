@@ -56,7 +56,7 @@ pub use sp_runtime::{Perbill, Permill};
 // XCM imports
 use pallet_xcm::{EnsureXcm, IsMajorityOfBody, XcmPassthrough};
 use polkadot_parachain::primitives::Sibling;
-use xcm::latest::prelude::*;
+use xcm::v0::{BodyId, Junction::*, MultiLocation, MultiLocation::*, NetworkId, Xcm};
 use xcm_builder::{
 	AccountId32Aliases, AllowTopLevelPaidExecutionFrom, AllowUnpaidExecutionFrom, CurrencyAdapter,
 	EnsureXcmOrigin, FixedWeightBounds, IsConcrete, LocationInverter, NativeAsset,
@@ -65,6 +65,15 @@ use xcm_builder::{
 	SovereignSignedViaLocation, TakeWeightCredit, UsingComponents,
 };
 use xcm_executor::{Config, XcmExecutor};
+
+pub mod constants;
+use constants::{currency::*};
+// use constants::currency::AMAS_UNITS;//{AMAS_UNITS, AMAS_CENTS, AMAS_MILLI_UNITS, AMAS_MILLICENTS};
+
+mod weights;
+mod part_authorship;
+mod part_session_and_collatorselection;
+mod part_ocw;
 
 pub type SessionHandlers = ();
 
@@ -97,9 +106,13 @@ pub const MINUTES: BlockNumber = 60_000 / (MILLISECS_PER_BLOCK as BlockNumber);
 pub const HOURS: BlockNumber = MINUTES * 60;
 pub const DAYS: BlockNumber = HOURS * 24;
 
-pub const ROC: Balance = 1_000_000_000_000;
-pub const MILLIROC: Balance = 1_000_000_000;
-pub const MICROROC: Balance = 1_000_000;
+// pub const ROC: Balance = 1_000_000_000_000;
+pub const ROC: Balance = AMAS_UNITS;
+// pub const MILLIROC: Balance = 1_000_000_000;
+pub const MILLIROC: Balance = AMAS_MILLI_UNITS;
+// pub const MICROROC: Balance = 1_000_000;
+pub const MICROROC: Balance = AMAS_MILLICENTS;
+
 
 // 1 in 4 blocks (on average, not counting collisions) will be primary babe blocks.
 pub const PRIMARY_PROBABILITY: (u64, u64) = (1, 4);
@@ -257,10 +270,10 @@ impl parachain_info::Config for Runtime {}
 impl cumulus_pallet_aura_ext::Config for Runtime {}
 
 parameter_types! {
-	pub const RocLocation: MultiLocation = MultiLocation::parent();
+	pub const RocLocation: MultiLocation = X1(Parent);
 	pub const RococoNetwork: NetworkId = NetworkId::Polkadot;
 	pub RelayChainOrigin: Origin = cumulus_pallet_xcm::Origin::Relay.into();
-	pub Ancestry: MultiLocation = Parachain(ParachainInfo::parachain_id().into()).into();
+	pub Ancestry: MultiLocation = X1(Parachain(ParachainInfo::parachain_id().into()));
 }
 
 /// Type for specifying how a `MultiLocation` can be converted into an `AccountId`. This is used
@@ -317,13 +330,12 @@ parameter_types! {
 	// One XCM operation is 1_000_000 weight - almost certainly a conservative estimate.
 	pub UnitWeightCost: Weight = 1_000_000;
 	// One ROC buys 1 second of weight.
-	pub const WeightPrice: (MultiLocation, u128) = (MultiLocation::parent(), ROC);
+	pub const WeightPrice: (MultiLocation, u128) = (X1(Parent), ROC);
 }
 
 match_type! {
 	pub type ParentOrParentsUnitPlurality: impl Contains<MultiLocation> = {
-		MultiLocation { parents: 1, interior: Here } |
-		MultiLocation { parents: 1, interior: X1(Plurality { id: BodyId::Unit, .. }) }
+		X1(Parent) | X2(Parent, Plurality { id: BodyId::Unit, .. })
 	};
 }
 
@@ -357,7 +369,7 @@ pub type LocalOriginToLocation = SignedToAccountId32<Origin, AccountId, RococoNe
 /// queues.
 pub type XcmRouter = (
 	// Two routers - use UMP to communicate with the relay chain:
-	cumulus_primitives_utility::ParentAsUmp<ParachainSystem, ()>,
+	cumulus_primitives_utility::ParentAsUmp<ParachainSystem>,
 	// ..and XCMP to communicate with the sibling chains.
 	XcmpQueue,
 );
@@ -370,7 +382,7 @@ impl pallet_xcm::Config for Runtime {
 	type XcmExecuteFilter = Everything;
 	type XcmExecutor = XcmExecutor<XcmConfig>;
 	type XcmTeleportFilter = Everything;
-	type XcmReserveTransferFilter = frame_support::traits::Nothing;
+	type XcmReserveTransferFilter = ();
 	type Weigher = FixedWeightBounds<UnitWeightCost, Call>;
 	type LocationInverter = LocationInverter<Ancestry>;
 }
@@ -384,7 +396,6 @@ impl cumulus_pallet_xcmp_queue::Config for Runtime {
 	type Event = Event;
 	type XcmExecutor = XcmExecutor<XcmConfig>;
 	type ChannelInfo = ParachainSystem;
-	type VersionWrapper = ();
 }
 
 impl cumulus_pallet_dmp_queue::Config for Runtime {
@@ -453,8 +464,16 @@ construct_runtime! {
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>} = 30,
 		Assets: pallet_assets::{Pallet, Call, Storage, Event<T>} = 31,
 
-		Aura: pallet_aura::{Pallet, Config<T>},
-		AuraExt: cumulus_pallet_aura_ext::{Pallet, Config},
+		// Ares the order of these 4 are important and shall not change.
+		Authorship: pallet_authorship::{Pallet, Call, Storage, Inherent},
+		CollatorSelection: pallet_collator_selection::{Pallet, Call, Storage, Event<T>, Config<T>},
+		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
+		Aura: pallet_aura::{Pallet, Storage, Config<T>},
+		AuraExt: cumulus_pallet_aura_ext::{Pallet, Storage, Config},
+
+		// Aura: pallet_aura::{Pallet, Config<T>},
+		// AuraExt: cumulus_pallet_aura_ext::{Pallet, Config},
+
 
 		// XCM helpers.
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 50,
@@ -463,6 +482,9 @@ construct_runtime! {
 		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 53,
 
 		Spambot: cumulus_ping::{Pallet, Call, Storage, Event<T>} = 99,
+
+		OCWModule: pallet_ocw::{Pallet, Call, Storage, Event<T>, ValidateUnsigned},
+
 	}
 }
 
@@ -472,7 +494,8 @@ pub type Signature = sp_runtime::MultiSignature;
 /// to the public key of our transaction signing scheme.
 pub type AccountId = <<Signature as sp_runtime::traits::Verify>::Signer as sp_runtime::traits::IdentifyAccount>::AccountId;
 /// Balance of an account.
-pub type Balance = u128;
+// pub type Balance = u128;
+pub type Balance = CurrencyBalance;
 /// Index of a transaction in the chain.
 pub type Index = u32;
 /// A hash of some data used by the chain.
@@ -587,27 +610,6 @@ impl_runtime_apis! {
 
 		fn authorities() -> Vec<AuraId> {
 			Aura::authorities()
-		}
-	}
-
-	impl frame_system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Index> for Runtime {
-		fn account_nonce(account: AccountId) -> Index {
-			System::account_nonce(account)
-		}
-	}
-
-	impl pallet_transaction_payment_rpc_runtime_api::TransactionPaymentApi<Block, Balance> for Runtime {
-		fn query_info(
-			uxt: <Block as BlockT>::Extrinsic,
-			len: u32,
-		) -> pallet_transaction_payment_rpc_runtime_api::RuntimeDispatchInfo<Balance> {
-			TransactionPayment::query_info(uxt, len)
-		}
-		fn query_fee_details(
-			uxt: <Block as BlockT>::Extrinsic,
-			len: u32,
-		) -> pallet_transaction_payment::FeeDetails<Balance> {
-			TransactionPayment::query_fee_details(uxt, len)
 		}
 	}
 

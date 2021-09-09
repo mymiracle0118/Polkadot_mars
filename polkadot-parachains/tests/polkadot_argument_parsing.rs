@@ -21,7 +21,6 @@ mod common;
 
 #[test]
 #[cfg(unix)]
-#[ignore]
 fn polkadot_argument_parsing() {
 	use nix::{
 		sys::signal::{

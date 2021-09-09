@@ -42,8 +42,11 @@ use rand_chacha::{
 	ChaChaRng,
 };
 use sp_runtime::{traits::Hash, RuntimeDebug};
-use sp_std::{prelude::*, convert::TryFrom};
-use xcm::{latest::prelude::*, WrapVersion, VersionedXcm};
+use sp_std::{convert::TryFrom, prelude::*};
+use xcm::{
+	v0::{Error as XcmError, ExecuteXcm, Junction, MultiLocation, Outcome, SendXcm, Xcm},
+	VersionedXcm,
+};
 
 pub use pallet::*;
 
@@ -66,9 +69,6 @@ pub mod pallet {
 
 		/// Information on the avaialble XCMP channels.
 		type ChannelInfo: GetChannelInfo;
-
-		/// Means of converting an `Xcm` into a `VersionedXcm`.
-		type VersionWrapper: WrapVersion;
 	}
 
 	impl Default for QueueConfigData {
@@ -351,7 +351,7 @@ impl<T: Config> Pallet<T> {
 		log::debug!("Processing XCMP-XCM: {:?}", &hash);
 		let (result, event) = match Xcm::<T::Call>::try_from(xcm) {
 			Ok(xcm) => {
-				let location = (1, Parachain(sender.into()));
+				let location = (Junction::Parent, Junction::Parachain(sender.into()));
 				match T::XcmExecutor::execute_xcm(location.into(), xcm, max_weight) {
 					Outcome::Error(e) => (Err(e.clone()), Event::Fail(Some(hash), e)),
 					Outcome::Complete(w) => (Ok(w), Event::Success(Some(hash))),
@@ -777,14 +777,13 @@ impl<T: Config> SendXcm for Pallet<T> {
 	fn send_xcm(dest: MultiLocation, msg: Xcm<()>) -> Result<(), XcmError> {
 		match &dest {
 			// An HRMP message for a sibling parachain.
-			MultiLocation { parents: 1, interior: X1(Parachain(id)) } => {
-				let versioned_xcm = T::VersionWrapper::wrap_version(&dest, msg)
-					.map_err(|()| XcmError::DestinationUnsupported)?;
-				let hash = T::Hashing::hash_of(&versioned_xcm);
+			MultiLocation::X2(Junction::Parent, Junction::Parachain(id)) => {
+				let msg = VersionedXcm::<()>::from(msg);
+				let hash = T::Hashing::hash_of(&msg);
 				Self::send_fragment(
 					(*id).into(),
 					XcmpMessageFormat::ConcatenatedVersionedXcm,
-					versioned_xcm,
+					msg,
 				)
 				.map_err(|e| XcmError::SendFailed(<&'static str>::from(e)))?;
 				Self::deposit_event(Event::XcmpMessageSent(Some(hash)));

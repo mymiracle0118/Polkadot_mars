@@ -1,0 +1,12 @@
+{
+    "jsonrpc":"2.0",
+    "id":1,
+    "method":"author_insertKey",
+    "params": [
+        "aura",
+        "blur pioneer frown science banana impose avoid law act strategy have bronze//1//controller",
+        "0xaaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019"
+    ]
+}
+
+

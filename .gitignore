@@ -5,3 +5,7 @@
 /.cargo/config
 polkadot_argument_parsing
 **/node_modules
+
+/data
+**/*.private.md
+/test-relay-chain-rococo

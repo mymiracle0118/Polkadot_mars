@@ -24,8 +24,7 @@ use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
-pub type ChainSpec =
-	sc_service::GenericChainSpec<rococo_parachain_runtime::GenesisConfig, Extensions>;
+pub type ChainSpec = sc_service::GenericChainSpec<rococo_parachain_runtime::GenesisConfig, Extensions>;
 
 /// Specialized `ChainSpec` for the shell parachain runtime.
 pub type ShellChainSpec = sc_service::GenericChainSpec<shell_runtime::GenesisConfig, Extensions>;
@@ -57,24 +56,31 @@ impl Extensions {
 type AccountPublic = <Signature as Verify>::Signer;
 
 /// Helper function to generate an account ID from seed
-pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId
-where
+pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId where
 	AccountPublic: From<<TPublic::Pair as Pair>::Public>,
 {
 	AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
 }
 
+
 pub fn get_chain_spec(id: ParaId) -> ChainSpec {
 	ChainSpec::from_genesis(
-		"Ares PC1",
-		"ares_pc1",
+		"Local Testnet",
+		"local_testnet",
 		ChainType::Local,
 		move || {
 			testnet_genesis(
 				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				// initial collators.
 				vec![
-					get_from_seed::<AuraId>("Alice"),
-					get_from_seed::<AuraId>("Bob"),
+					(
+						get_account_id_from_seed::<sr25519::Public>("Alice"),
+						get_collator_keys_from_seed("Alice"),
+					),
+					(
+						get_account_id_from_seed::<sr25519::Public>("Bob"),
+						get_collator_keys_from_seed("Bob"),
+					),
 				],
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -96,7 +102,11 @@ pub fn get_chain_spec(id: ParaId) -> ChainSpec {
 		vec![],
 		None,
 		None,
-		None,
+		Some(
+			serde_json::from_str(
+				"{\"tokenDecimals\": 12, \"tokenSymbol\": \"AMAS\", \"SS58Prefix\": 34}",
+			).expect("Provided valid json map"),
+		),
 		Extensions {
 			relay_chain: "westend".into(),
 			para_id: id.into(),
@@ -123,22 +133,35 @@ pub fn get_shell_chain_spec(id: ParaId) -> ShellChainSpec {
 
 pub fn staging_test_net(id: ParaId) -> ChainSpec {
 	ChainSpec::from_genesis(
-		"Staging Testnet",
-		"staging_testnet",
+		"Mars Testnet",
+		"mars_testnet",
 		ChainType::Live,
 		move || {
 			testnet_genesis(
-				hex!["9ed7705e3c7da027ba0583a22a3212042f7e715d3c168ba14f1424e2bc111d00"].into(),
+				hex!["aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019"].into(),
 				vec![
-					// $secret//one
-					hex!["aad9fa2249f87a210a0f93400b7f90e47b810c6d65caa0ca3f5af982904c2a33"]
-						.unchecked_into(),
-					// $secret//two
-					hex!["d47753f0cca9dd8da00c70e82ec4fc5501a69c49a5952a643d18802837c88212"]
-						.unchecked_into(),
+					(
+						hex!["aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019"].into(), //1//controller
+						hex!["aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019"].unchecked_into(),
+					),
+					(
+						hex!["74a173a22757ddc9790ed388953a1ed8a5933a421858533411b36ebd41d74165"].into(), //2//controller
+						hex!["74a173a22757ddc9790ed388953a1ed8a5933a421858533411b36ebd41d74165"].unchecked_into(),
+					),
 				],
+				// vec![
+				// 	// $secret//one
+				// 	hex!["aad9fa2249f87a210a0f93400b7f90e47b810c6d65caa0ca3f5af982904c2a33"]
+				// 		.unchecked_into(),
+				// 	// $secret//two
+				// 	hex!["d47753f0cca9dd8da00c70e82ec4fc5501a69c49a5952a643d18802837c88212"]
+				// 		.unchecked_into(),
+				// ],
 				vec![
-					hex!["9ed7705e3c7da027ba0583a22a3212042f7e715d3c168ba14f1424e2bc111d00"].into(),
+					hex!["aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019"].into(),
+					hex!["74a173a22757ddc9790ed388953a1ed8a5933a421858533411b36ebd41d74165"].into(),
+					hex!["9e55f821f7b3484f15942af308001c32f113f31444f420a77422702907510669"].into(),
+					hex!["587bae319ecaee13ce2dbdedfc6d66eb189e5af427666b21b4d4a08c7af0671c"].into(),
 				],
 				id,
 			)
@@ -146,9 +169,13 @@ pub fn staging_test_net(id: ParaId) -> ChainSpec {
 		Vec::new(),
 		None,
 		None,
-		None,
+		Some(
+			serde_json::from_str(
+				"{\"tokenDecimals\": 12, \"tokenSymbol\": \"AMAS\", \"SS58Prefix\": 34}",
+			).expect("Provided valid json map"),
+		),
 		Extensions {
-			relay_chain: "westend".into(),
+			relay_chain: "kusama".into(),
 			para_id: id.into(),
 		},
 	)
@@ -156,7 +183,8 @@ pub fn staging_test_net(id: ParaId) -> ChainSpec {
 
 fn testnet_genesis(
 	root_key: AccountId,
-	initial_authorities: Vec<AuraId>,
+	invulnerables: Vec<(AccountId, AuraId)>,
+	// initial_authorities: Vec<AuraId>,
 	endowed_accounts: Vec<AccountId>,
 	id: ParaId,
 ) -> rococo_parachain_runtime::GenesisConfig {
@@ -171,14 +199,34 @@ fn testnet_genesis(
 			balances: endowed_accounts
 				.iter()
 				.cloned()
-				.map(|k| (k, 1 << 60))
+				.map(|k| (k, 1 << 60)) // 1.1529215046068e+18
 				.collect(),
 		},
-		sudo: rococo_parachain_runtime::SudoConfig { key: root_key },
+		sudo: rococo_parachain_runtime::SudoConfig { key: root_key.clone() },
 		parachain_info: rococo_parachain_runtime::ParachainInfoConfig { parachain_id: id },
-		aura: rococo_parachain_runtime::AuraConfig {
-			authorities: initial_authorities,
+		// aura: rococo_parachain_runtime::AuraConfig {
+		// 	authorities: initial_authorities.clone(),
+		// },
+		collator_selection: rococo_parachain_runtime::CollatorSelectionConfig {
+			invulnerables: invulnerables.iter().cloned().map(|(acc, _)| acc).collect(),
+			candidacy_bond: AMAS_ED * 16,
+			..Default::default()
 		},
+		session: rococo_parachain_runtime::SessionConfig {
+			keys: invulnerables
+				.iter()
+				.cloned()
+				.map(|(acc, aura)| {
+					(
+						acc.clone(),                  // account id
+						acc.clone(),                  // validator id
+						rococo_parachain_runtime::SessionKeys { aura }, // session keys
+					)
+				})
+				.collect(),
+
+		},
+		aura: Default::default(),
 		aura_ext: Default::default(),
 		parachain_system: Default::default(),
 	}
@@ -197,19 +245,18 @@ fn shell_testnet_genesis(parachain_id: ParaId) -> shell_runtime::GenesisConfig {
 	}
 }
 
-use parachains_common::Balance as StatemintBalance;
+use statemint_common::Balance as StatemintBalance;
+use sc_telemetry::serde_json;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
-pub type StatemintChainSpec =
-	sc_service::GenericChainSpec<statemint_runtime::GenesisConfig, Extensions>;
-pub type StatemineChainSpec =
-	sc_service::GenericChainSpec<statemine_runtime::GenesisConfig, Extensions>;
-pub type WestmintChainSpec =
-	sc_service::GenericChainSpec<westmint_runtime::GenesisConfig, Extensions>;
+pub type StatemintChainSpec = sc_service::GenericChainSpec<statemint_runtime::GenesisConfig, Extensions>;
+pub type StatemineChainSpec = sc_service::GenericChainSpec<statemine_runtime::GenesisConfig, Extensions>;
+pub type WestmintChainSpec = sc_service::GenericChainSpec<westmint_runtime::GenesisConfig, Extensions>;
 
 const STATEMINT_ED: StatemintBalance = statemint_runtime::constants::currency::EXISTENTIAL_DEPOSIT;
 const STATEMINE_ED: StatemintBalance = statemine_runtime::constants::currency::EXISTENTIAL_DEPOSIT;
 const WESTMINT_ED: StatemintBalance = westmint_runtime::constants::currency::EXISTENTIAL_DEPOSIT;
+const AMAS_ED: StatemintBalance =  rococo_parachain_runtime::constants::currency::EXISTENTIAL_DEPOSIT;
 
 /// Helper function to generate a crypto pair from seed
 pub fn get_pair_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -228,22 +275,22 @@ pub fn get_collator_keys_from_seed(seed: &str) -> AuraId {
 /// Generate the session keys from individual elements.
 ///
 /// The input must be a tuple of individual keys (a single arg for now since we have just one key).
-pub fn statemint_session_keys(keys: AuraId) -> statemint_runtime::SessionKeys {
-	statemint_runtime::SessionKeys { aura: keys }
+pub fn statemint_session_keys(keys: AuraId) -> statemint_runtime::opaque::SessionKeys {
+	statemint_runtime::opaque::SessionKeys { aura: keys }
 }
 
 /// Generate the session keys from individual elements.
 ///
 /// The input must be a tuple of individual keys (a single arg for now since we have just one key).
-pub fn statemine_session_keys(keys: AuraId) -> statemine_runtime::SessionKeys {
-	statemine_runtime::SessionKeys { aura: keys }
+pub fn statemine_session_keys(keys: AuraId) -> statemine_runtime::opaque::SessionKeys {
+	statemine_runtime::opaque::SessionKeys { aura: keys }
 }
 
 /// Generate the session keys from individual elements.
 ///
 /// The input must be a tuple of individual keys (a single arg for now since we have just one key).
-pub fn westmint_session_keys(keys: AuraId) -> westmint_runtime::SessionKeys {
-	westmint_runtime::SessionKeys { aura: keys }
+pub fn westmint_session_keys(keys: AuraId) -> westmint_runtime::opaque::SessionKeys {
+	westmint_runtime::opaque::SessionKeys { aura: keys }
 }
 
 pub fn statemint_development_config(id: ParaId) -> StatemintChainSpec {
@@ -260,10 +307,12 @@ pub fn statemint_development_config(id: ParaId) -> StatemintChainSpec {
 		move || {
 			statemint_genesis(
 				// initial collators.
-				vec![(
-					get_account_id_from_seed::<sr25519::Public>("Alice"),
-					get_collator_keys_from_seed("Alice"),
-				)],
+				vec![
+					(
+						get_account_id_from_seed::<sr25519::Public>("Alice"),
+						get_collator_keys_from_seed("Alice"),
+					)
+				],
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_account_id_from_seed::<sr25519::Public>("Bob"),
@@ -298,15 +347,14 @@ pub fn statemint_local_config(id: ParaId) -> StatemintChainSpec {
 		move || {
 			statemint_genesis(
 				// initial collators.
-				vec![
-					(
-						get_account_id_from_seed::<sr25519::Public>("Alice"),
-						get_collator_keys_from_seed("Alice"),
-					),
-					(
-						get_account_id_from_seed::<sr25519::Public>("Bob"),
-						get_collator_keys_from_seed("Bob"),
-					),
+				vec![(
+						 get_account_id_from_seed::<sr25519::Public>("Alice"),
+						 get_collator_keys_from_seed("Alice")
+					 ),
+					 (
+						 get_account_id_from_seed::<sr25519::Public>("Bob"),
+						 get_collator_keys_from_seed("Bob")
+					 ),
 				],
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -362,17 +410,11 @@ fn statemint_genesis(
 			..Default::default()
 		},
 		session: statemint_runtime::SessionConfig {
-			keys: invulnerables
-				.iter()
-				.cloned()
-				.map(|(acc, aura)| {
-					(
-						acc.clone(),                  // account id
-						acc.clone(),                  // validator id
-						statemint_session_keys(aura), // session keys
-					)
-				})
-				.collect(),
+			keys: invulnerables.iter().cloned().map(|(acc, aura)| (
+				acc.clone(), // account id
+				acc.clone(), // validator id
+				statemint_session_keys(aura), // session keys
+			)).collect()
 		},
 		// no need to pass anything to aura, in fact it will panic if we do. Session will take care
 		// of this.
@@ -396,10 +438,12 @@ pub fn statemine_development_config(id: ParaId) -> StatemineChainSpec {
 		move || {
 			statemine_genesis(
 				// initial collators.
-				vec![(
-					get_account_id_from_seed::<sr25519::Public>("Alice"),
-					get_collator_keys_from_seed("Alice"),
-				)],
+				vec![
+					(
+						get_account_id_from_seed::<sr25519::Public>("Alice"),
+						get_collator_keys_from_seed("Alice"),
+					)
+				],
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_account_id_from_seed::<sr25519::Public>("Bob"),
@@ -434,15 +478,14 @@ pub fn statemine_local_config(id: ParaId) -> StatemineChainSpec {
 		move || {
 			statemine_genesis(
 				// initial collators.
-				vec![
-					(
-						get_account_id_from_seed::<sr25519::Public>("Alice"),
-						get_collator_keys_from_seed("Alice"),
-					),
-					(
-						get_account_id_from_seed::<sr25519::Public>("Bob"),
-						get_collator_keys_from_seed("Bob"),
-					),
+				vec![(
+						 get_account_id_from_seed::<sr25519::Public>("Alice"),
+						 get_collator_keys_from_seed("Alice")
+					 ),
+					 (
+						 get_account_id_from_seed::<sr25519::Public>("Bob"),
+						 get_collator_keys_from_seed("Bob")
+					 ),
 				],
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -486,31 +529,22 @@ pub fn statemine_config(id: ParaId) -> StatemineChainSpec {
 		move || {
 			statemine_genesis(
 				// initial collators.
-				vec![
-					(
-						hex!("50673d59020488a4ffc9d8c6de3062a65977046e6990915617f85fef6d349730")
-							.into(),
-						hex!("50673d59020488a4ffc9d8c6de3062a65977046e6990915617f85fef6d349730")
-							.unchecked_into(),
-					),
-					(
-						hex!("fe8102dbc244e7ea2babd9f53236d67403b046154370da5c3ea99def0bd0747a")
-							.into(),
-						hex!("fe8102dbc244e7ea2babd9f53236d67403b046154370da5c3ea99def0bd0747a")
-							.unchecked_into(),
-					),
-					(
-						hex!("38144b5398e5d0da5ec936a3af23f5a96e782f676ab19d45f29075ee92eca76a")
-							.into(),
-						hex!("38144b5398e5d0da5ec936a3af23f5a96e782f676ab19d45f29075ee92eca76a")
-							.unchecked_into(),
-					),
-					(
-						hex!("3253947640e309120ae70fa458dcacb915e2ddd78f930f52bd3679ec63fc4415")
-							.into(),
-						hex!("3253947640e309120ae70fa458dcacb915e2ddd78f930f52bd3679ec63fc4415")
-							.unchecked_into(),
-					),
+				vec![(
+						 hex!("50673d59020488a4ffc9d8c6de3062a65977046e6990915617f85fef6d349730").into(),
+						 hex!("50673d59020488a4ffc9d8c6de3062a65977046e6990915617f85fef6d349730").unchecked_into()
+					 ),
+					 (
+						 hex!("fe8102dbc244e7ea2babd9f53236d67403b046154370da5c3ea99def0bd0747a").into(),
+						 hex!("fe8102dbc244e7ea2babd9f53236d67403b046154370da5c3ea99def0bd0747a").unchecked_into()
+					 ),
+					 (
+						 hex!("38144b5398e5d0da5ec936a3af23f5a96e782f676ab19d45f29075ee92eca76a").into(),
+						 hex!("38144b5398e5d0da5ec936a3af23f5a96e782f676ab19d45f29075ee92eca76a").unchecked_into()
+					 ),
+					 (
+						 hex!("3253947640e309120ae70fa458dcacb915e2ddd78f930f52bd3679ec63fc4415").into(),
+						 hex!("3253947640e309120ae70fa458dcacb915e2ddd78f930f52bd3679ec63fc4415").unchecked_into()
+					 ),
 				],
 				vec![],
 				id,
@@ -553,17 +587,11 @@ fn statemine_genesis(
 			..Default::default()
 		},
 		session: statemine_runtime::SessionConfig {
-			keys: invulnerables
-				.iter()
-				.cloned()
-				.map(|(acc, aura)| {
-					(
-						acc.clone(),                  // account id
-						acc.clone(),                  // validator id
-						statemine_session_keys(aura), // session keys
-					)
-				})
-				.collect(),
+			keys: invulnerables.iter().cloned().map(|(acc, aura)| (
+				acc.clone(), // account id
+				acc.clone(), // validator id
+				statemine_session_keys(aura), // session keys
+			)).collect()
 		},
 		aura: Default::default(),
 		aura_ext: Default::default(),
@@ -585,10 +613,12 @@ pub fn westmint_development_config(id: ParaId) -> WestmintChainSpec {
 		move || {
 			westmint_genesis(
 				// initial collators.
-				vec![(
-					get_account_id_from_seed::<sr25519::Public>("Alice"),
-					get_collator_keys_from_seed("Alice"),
-				)],
+				vec![
+					(
+						get_account_id_from_seed::<sr25519::Public>("Alice"),
+						get_collator_keys_from_seed("Alice"),
+					)
+				],
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_account_id_from_seed::<sr25519::Public>("Bob"),
@@ -624,15 +654,14 @@ pub fn westmint_local_config(id: ParaId) -> WestmintChainSpec {
 		move || {
 			westmint_genesis(
 				// initial collators.
-				vec![
-					(
-						get_account_id_from_seed::<sr25519::Public>("Alice"),
-						get_collator_keys_from_seed("Alice"),
-					),
-					(
-						get_account_id_from_seed::<sr25519::Public>("Bob"),
-						get_collator_keys_from_seed("Bob"),
-					),
+				vec![(
+						 get_account_id_from_seed::<sr25519::Public>("Alice"),
+						 get_collator_keys_from_seed("Alice")
+					 ),
+					 (
+						 get_account_id_from_seed::<sr25519::Public>("Bob"),
+						 get_collator_keys_from_seed("Bob")
+					 ),
 				],
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -677,31 +706,22 @@ pub fn westmint_config(id: ParaId) -> WestmintChainSpec {
 		move || {
 			westmint_genesis(
 				// initial collators.
-				vec![
-					(
-						hex!("9cfd429fa002114f33c1d3e211501d62830c9868228eb3b4b8ae15a83de04325")
-							.into(),
-						hex!("9cfd429fa002114f33c1d3e211501d62830c9868228eb3b4b8ae15a83de04325")
-							.unchecked_into(),
-					),
-					(
-						hex!("12a03fb4e7bda6c9a07ec0a11d03c24746943e054ff0bb04938970104c783876")
-							.into(),
-						hex!("12a03fb4e7bda6c9a07ec0a11d03c24746943e054ff0bb04938970104c783876")
-							.unchecked_into(),
-					),
-					(
-						hex!("1256436307dfde969324e95b8c62cb9101f520a39435e6af0f7ac07b34e1931f")
-							.into(),
-						hex!("1256436307dfde969324e95b8c62cb9101f520a39435e6af0f7ac07b34e1931f")
-							.unchecked_into(),
-					),
-					(
-						hex!("98102b7bca3f070f9aa19f58feed2c0a4e107d203396028ec17a47e1ed80e322")
-							.into(),
-						hex!("98102b7bca3f070f9aa19f58feed2c0a4e107d203396028ec17a47e1ed80e322")
-							.unchecked_into(),
-					),
+				vec![(
+						 hex!("9cfd429fa002114f33c1d3e211501d62830c9868228eb3b4b8ae15a83de04325").into(),
+						 hex!("9cfd429fa002114f33c1d3e211501d62830c9868228eb3b4b8ae15a83de04325").unchecked_into()
+					 ),
+					 (
+						 hex!("12a03fb4e7bda6c9a07ec0a11d03c24746943e054ff0bb04938970104c783876").into(),
+						 hex!("12a03fb4e7bda6c9a07ec0a11d03c24746943e054ff0bb04938970104c783876").unchecked_into()
+					 ),
+					 (
+						 hex!("1256436307dfde969324e95b8c62cb9101f520a39435e6af0f7ac07b34e1931f").into(),
+						 hex!("1256436307dfde969324e95b8c62cb9101f520a39435e6af0f7ac07b34e1931f").unchecked_into()
+					 ),
+					 (
+						 hex!("98102b7bca3f070f9aa19f58feed2c0a4e107d203396028ec17a47e1ed80e322").into(),
+						 hex!("98102b7bca3f070f9aa19f58feed2c0a4e107d203396028ec17a47e1ed80e322").unchecked_into()
+					 ),
 				],
 				vec![],
 				// re-use the Westend sudo key
@@ -748,17 +768,11 @@ fn westmint_genesis(
 			..Default::default()
 		},
 		session: westmint_runtime::SessionConfig {
-			keys: invulnerables
-				.iter()
-				.cloned()
-				.map(|(acc, aura)| {
-					(
-						acc.clone(),                 // account id
-						acc.clone(),                 // validator id
-						westmint_session_keys(aura), // session keys
-					)
-				})
-				.collect(),
+			keys: invulnerables.iter().cloned().map(|(acc, aura)| (
+				acc.clone(), // account id
+				acc.clone(), // validator id
+				westmint_session_keys(aura), // session keys
+			)).collect()
 		},
 		// no need to pass anything to aura, in fact it will panic if we do. Session will take care
 		// of this.
