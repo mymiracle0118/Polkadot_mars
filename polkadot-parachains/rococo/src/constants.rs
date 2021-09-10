@@ -20,6 +20,11 @@ pub mod currency {
 	// 	// TODO:: LIN:: test equal.
     //  // (items as Balance * UNITS + (bytes as Balance) * 5 * MILLICENTS) / 10
 	// }
+
+	// TODO:: Check if it is right.
+	pub const fn deposit(items: u32, bytes: u32) -> CurrencyBalance {
+		items as CurrencyBalance * 15 * AMAS_CENTS + (bytes as CurrencyBalance) * 6 * AMAS_CENTS
+	}
 }
 
 /// Time.

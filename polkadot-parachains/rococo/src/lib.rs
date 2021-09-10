@@ -39,11 +39,15 @@ use sp_version::RuntimeVersion;
 pub use frame_support::{
 	construct_runtime, match_type, parameter_types,
 	traits::{Everything, IsInVec, Randomness},
+	traits::{
+		AllowAll, Currency, DenyAll, Imbalance, InstanceFilter, KeyOwnerProofSystem,
+		LockIdentifier, OnUnbalanced, U128CurrencyToVote,
+	},
 	weights::{
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
 		DispatchClass, IdentityFee, Weight,
 	},
-	StorageValue,
+	StorageValue, PalletId, RuntimeDebug,
 };
 use frame_system::limits::{BlockLength, BlockWeights};
 pub use pallet_balances::Call as BalancesCall;
@@ -82,6 +86,8 @@ mod part_treasury;
 mod part_bounties;
 mod part_democracy;
 mod part_scheduler;
+mod part_multisig;
+mod part_proxy;
 
 pub type SessionHandlers = ();
 
@@ -491,6 +497,9 @@ construct_runtime! {
 		Treasury: pallet_treasury::{Pallet, Call, Storage, Config, Event<T>},
 		Bounties: pallet_bounties::{Pallet, Call, Storage, Event<T>},
 		Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>},
+		Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>},
+		Proxy: pallet_proxy::{Pallet, Call, Storage, Event<T>},
+		// Staking: pallet_staking::{Pallet, Call, Config<T>, Storage, Event<T>},
 
 		// XCM helpers.
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 50,
