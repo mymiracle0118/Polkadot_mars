@@ -244,6 +244,7 @@ fn testnet_genesis(
 		aura: Default::default(),
 		aura_ext: Default::default(),
 		parachain_system: Default::default(),
+		vesting: rococo_parachain_runtime::VestingConfig { vesting: vec![] },
 	}
 }
 

@@ -8691,6 +8691,7 @@ dependencies = [
  "pallet-transaction-payment",
  "pallet-treasury",
  "pallet-utility",
+ "pallet-vesting",
  "pallet-xcm",
  "parachain-info",
  "parity-scale-codec",
