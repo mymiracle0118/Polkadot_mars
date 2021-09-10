@@ -88,6 +88,7 @@ mod part_democracy;
 mod part_scheduler;
 mod part_multisig;
 mod part_proxy;
+mod part_vesting;
 
 pub type SessionHandlers = ();
 
@@ -460,18 +461,6 @@ impl pallet_assets::Config for Runtime {
 impl pallet_aura::Config for Runtime {
 	type AuthorityId = AuraId;
 	type DisabledValidators = ();
-}
-
-parameter_types! {
-    pub const MinVestedTransfer: Balance = 1 * AMAS_CENTS; 
-}
-
-impl pallet_vesting::Config for Runtime {
-    type Event = Event;
-    type Currency = Balances;
-    type BlockNumberToBalance = ConvertInto;
-    type MinVestedTransfer = MinVestedTransfer;
-    type WeightInfo = pallet_vesting::weights::SubstrateWeight<Runtime>;
 }
 
 construct_runtime! {
