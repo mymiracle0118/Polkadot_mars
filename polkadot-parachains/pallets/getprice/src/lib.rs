@@ -113,7 +113,7 @@ pub mod pallet {
 		}
 
         #[pallet::weight(0)]
-		pub fn res_price(origin: OriginFor<T>, account: T::AccountId, price: u32) -> DispatchResultWithPostInfo {
+		pub fn price_callback(origin: OriginFor<T>, account: T::AccountId, price: u32) -> DispatchResultWithPostInfo {
 			print("res_price");
 			// Only accept pings from other chains.
 			//let who = ensure_signed(origin.clone())?;

@@ -76,39 +76,24 @@ pub mod pallet {
 		where sp_runtime::AccountId32: From<<T as frame_system::Config>::AccountId>,
 	{
 		#[pallet::weight(0)]
-		pub fn bridge(origin: OriginFor<T>, account: T::AccountId, symbol: Vec<u8>, ori_pallet_idx: u8, ori_method_idx: u8) -> DispatchResultWithPostInfo {
+		pub fn price(origin: OriginFor<T>, account: T::AccountId, symbol: Vec<u8>, ori_pallet_idx: u8, ori_method_idx: u8) -> DispatchResultWithPostInfo {
 			print("enter bridge pallet_idx ");
-
             log::info!("account {:?} pallet_idx {:?} method_idx {:?}", account.clone(), ori_pallet_idx, ori_method_idx);
-			// let who = ensure_signed(origin.clone())?;
-            // log::info!("who {:?}", who);
-            // get the source parachain id from origin
+			
 			let para_id = ensure_sibling_para(<T as Config>::Origin::from(origin))?;
             log::info!("para_id {:?}", para_id);
-            //TODO: getprice from ares
-			//let price = 0;
+            
 			let price = pallet_ocw::Pallet::<T>::get_price_symbol(symbol.clone());
-			//let price = <T as pallet_ocw::Config>::pallet_ocw::Pallet::<T>::get_price_symbol(symbol.clone());
-			//let price = getPriceBySymbol(symbol.clone());
-			// if <AresPrice<T>>::contains_key(symbol.clone()) {
-			// 	// get and reset .
-			// 	let mut old_price = <AresPrice<T>>::get(symbol.clone());
-			// 	price = old_price[old_price.len() - 1];
-			// } 
 
 			log::info!("get price from ares:{:?}", price);
 			// emit event
 			Self::deposit_event(Event::GetPriceFinish(para_id, account.clone(), symbol.clone()));
-
             
-            //TODO: how to know pallet_index and method_index
             let call = ResPriceCall::<T::AccountId>::new(
 				ori_pallet_idx, 
 				ori_method_idx,
 				account.clone(),
 				price);
-
-            
 	
 			// build the xcm transact message
 			let message = Xcm::Transact { 
