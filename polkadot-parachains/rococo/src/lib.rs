@@ -358,10 +358,18 @@ match_type! {
 	};
 }
 
+match_type! {
+	pub type SpecParachain: impl Contains<MultiLocation> = {
+		X2(Parent, Parachain(2000)) | X2(Parent, Parachain(2001))
+	};
+}
+
 pub type Barrier = (
 	TakeWeightCredit,
 	AllowTopLevelPaidExecutionFrom<Everything>,
 	AllowUnpaidExecutionFrom<ParentOrParentsUnitPlurality>,
+	AllowUnpaidExecutionFrom<Everything>,
+	//AllowUnpaidExecutionFrom<SpecParachain>,
 	// ^^^ Parent & its unit plurality gets free execution
 );
 
@@ -424,6 +432,29 @@ impl cumulus_pallet_dmp_queue::Config for Runtime {
 }
 
 impl cumulus_ping::Config for Runtime {
+	type Event = Event;
+	type Origin = Origin;
+	type Call = Call;
+	type XcmSender = XcmRouter;
+}
+
+parameter_types! {
+	pub const BridgePalletID: u8 = 100;
+	pub const BridgeMethodID: u8 = 0;
+	pub const BridgeWeightAtMost: u64 = 1000;
+}
+
+impl pallet_getprice::Config for Runtime {
+	type Event = Event;
+	type Origin = Origin;
+	type Call = Call;
+	type XcmSender = XcmRouter;
+	type BridgePalletID = BridgePalletID;
+	type BridgeMethodID = BridgeMethodID;
+	type BridgeWeightAtMost = BridgeWeightAtMost;
+}
+
+impl pallet_bridge::Config for Runtime {
 	type Event = Event;
 	type Origin = Origin;
 	type Call = Call;
@@ -510,9 +541,11 @@ construct_runtime! {
 		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 53,
 
 		Spambot: cumulus_ping::{Pallet, Call, Storage, Event<T>} = 99,
+		Bridge: pallet_bridge::{Pallet, Call, Storage, Event<T>} = 100,
+		GetPrice: pallet_getprice::{Pallet, Call, Storage, Event<T>} = 101,
 
 		OCWModule: pallet_ocw::{Pallet, Call, Storage, Event<T>, ValidateUnsigned},
-
+		
 	}
 }
 
