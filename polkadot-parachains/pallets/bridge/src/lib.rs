@@ -12,33 +12,37 @@ pub mod pallet {
 	use cumulus_primitives_core::ParaId;
 	use cumulus_pallet_xcm::{Origin as CumulusOrigin, ensure_sibling_para};
 	use frame_support::sp_runtime::print;
+	//use pallet_ocw::getPriceBySymbol;
 
     #[derive(Encode, Decode, Clone, PartialEq, Eq, Default, RuntimeDebug)]
     pub struct ResPriceCall<AccountId> {
 		call_index: [u8; 2],
 		account: AccountId,
-		symbol: Vec<u8>,
+		price: u32,
 	}
 
 	impl<AccountId> ResPriceCall<AccountId> {
-		pub fn new(pallet_index: u8, method_index: u8, account: AccountId, symbol: Vec<u8>,) 
+		pub fn new(pallet_index: u8, method_index: u8, account: AccountId, price: u32,) 
 		-> Self {
 			ResPriceCall {
 				call_index: [pallet_index, method_index],
 				account: account,
-				symbol: symbol,
+				price: price,
 			}
 		}
 	}
 
 	#[pallet::config]
-	pub trait Config: frame_system::Config {
+	pub trait Config: frame_system::Config + pallet_ocw::Config
+		where sp_runtime::AccountId32: From<<Self as frame_system::Config>::AccountId>
+	{
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
 		// origin could from both extrinsic and xcm message
 		type Origin: From<<Self as frame_system::Config>::Origin> + Into<Result<CumulusOrigin, <Self as Config>::Origin>>;
 
 		type Call: From<Call<Self>> + Encode;
+		//type Call: From<Call<Self>>;
         /// The XCM sender module.
 		type XcmSender: SendXcm;
     }
@@ -50,7 +54,9 @@ pub mod pallet {
 	#[pallet::event]
 	#[pallet::metadata(T::AccountId = "AccountId")]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
-	pub enum Event<T: Config> {
+	pub enum Event<T: Config> 
+		where sp_runtime::AccountId32: From<<T as frame_system::Config>::AccountId>
+	{
 		GetPriceFinish(ParaId, T::AccountId, Vec<u8>),
         SendPriceSuccess(ParaId, T::AccountId, Vec<u8>),
 	}
@@ -61,10 +67,14 @@ pub mod pallet {
 	}
 
 	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> 
+		where sp_runtime::AccountId32: From<<T as frame_system::Config>::AccountId>
+	{}
 
 	#[pallet::call]
-	impl<T: Config> Pallet<T> {
+	impl<T: Config> Pallet<T> 
+		where sp_runtime::AccountId32: From<<T as frame_system::Config>::AccountId>,
+	{
 		#[pallet::weight(0)]
 		pub fn bridge(origin: OriginFor<T>, account: T::AccountId, symbol: Vec<u8>, ori_pallet_idx: u8, ori_method_idx: u8) -> DispatchResultWithPostInfo {
 			print("enter bridge pallet_idx ");
@@ -76,11 +86,21 @@ pub mod pallet {
 			let para_id = ensure_sibling_para(<T as Config>::Origin::from(origin))?;
             log::info!("para_id {:?}", para_id);
             //TODO: getprice from ares
+			//let price = 0;
+			let price = pallet_ocw::Pallet::<T>::get_price_symbol(symbol.clone());
+			//let price = <T as pallet_ocw::Config>::pallet_ocw::Pallet::<T>::get_price_symbol(symbol.clone());
+			//let price = getPriceBySymbol(symbol.clone());
+			// if <AresPrice<T>>::contains_key(symbol.clone()) {
+			// 	// get and reset .
+			// 	let mut old_price = <AresPrice<T>>::get(symbol.clone());
+			// 	price = old_price[old_price.len() - 1];
+			// } 
 
+			log::info!("get price from ares:{:?}", price);
 			// emit event
 			Self::deposit_event(Event::GetPriceFinish(para_id, account.clone(), symbol.clone()));
 
-            let price = vec![2,3,4,5];
+            
             //TODO: how to know pallet_index and method_index
             let call = ResPriceCall::<T::AccountId>::new(
 				ori_pallet_idx, 

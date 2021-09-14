@@ -25,6 +25,7 @@ xcm = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.9
 
 cumulus-primitives-core = { path = "../../../primitives/core", default-features = false }
 cumulus-pallet-xcm = { path = "../../../pallets/xcm", default-features = false }
+pallet-ocw = { default-features = false,  package = "pallet-ocw", path= "../pallet-ocw" }
 
 [features]
 default = ['std']
@@ -37,4 +38,5 @@ std = [
 	"frame-support/std",
 	"frame-system/std",
     "log/std",
+	"pallet-ocw/std",
 ]

@@ -614,4 +614,44 @@ impl<T: Config> Pallet<T>
             .propagate(true)
             .build()
     }
+
+    pub fn get_price_symbol(symbol: Vec<u8>) -> u32 {
+        let mut price = 0;
+       // let prices = Pallet::AresPrice::<T>::ares_prices(symbol.clone());
+       if <AresPrice<T>>::contains_key(symbol.clone()) {
+            let old_price = <AresPrice<T>>::get(symbol.clone());
+            if old_price.len() != 0 {
+                price = old_price[old_price.len() - 1];
+            }
+        } 
+        log::info!("get price latest, {:?}", price);
+        price
+    }
 }
+
+// impl<T: Config> Pallet<T> {
+//     pub fn get_price_symbol1(symbol: Vec<u8>) -> u32 {
+//         0
+//     //     let mut price = 0;
+//     //    // let prices = Pallet::AresPrice::<T>::ares_prices(symbol.clone());
+//     //    if <AresPrice<T>>::contains_key(symbol.clone()) {
+//     //         let old_price = <AresPrice<T>>::get(symbol.clone());
+//     //         price = old_price[old_price.len() - 1];
+//     //     } 
+//     //     price
+//     }
+// }
+
+// impl<T: Config> Pallet<T> {
+//     pub fn getPriceBySymbol(symbol: Vec<u8>) -> u32 {
+//         0
+//         //get_price_symbol(symbol.clone())
+//          //let mut price = 0;
+//          //let prices = Pallet::AresPrice::<T>::ares_prices(symbol.clone());
+//          //if Pallet::<T>::AresPrice::contains_key(symbol.clone()) {
+//          //     let old_price = <AresPrice<T>>::get(symbol.clone());
+//          //     price = old_price[old_price.len() - 1];
+//          //} 
+//          //price
+//     }
+// }

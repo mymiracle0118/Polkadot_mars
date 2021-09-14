@@ -5431,6 +5431,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "log",
+ "pallet-ocw",
  "parity-scale-codec",
  "serde",
  "sp-runtime",
