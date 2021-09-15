@@ -48,6 +48,7 @@ cumulus-pallet-xcm = { path = "../../pallets/xcm", default-features = false }
 cumulus-ping = { path = "../pallets/ping", default-features = false }
 pallet-getprice = {path = '../pallets/getprice', default-features = false}
 pallet-bridge = {path = '../pallets/bridge', default-features = false}
+parachain-staking = { path = "../pallets/parachain-staking", default-features = false }
 
 # Polkadot dependencies
 polkadot-parachain = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.9" }
@@ -139,5 +140,6 @@ std = [
 	"pallet-vesting/std",
 	'pallet-getprice/std',
 	'pallet-bridge/std',
+	'parachain-staking/std',
 #	"pallet-staking/std",
 ]

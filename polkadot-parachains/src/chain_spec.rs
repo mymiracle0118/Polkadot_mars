@@ -24,8 +24,14 @@ use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 use rococo_parachain_runtime::{
-	CouncilConfig,TechnicalCommitteeConfig,DemocracyConfig,
+	CouncilConfig,TechnicalCommitteeConfig,DemocracyConfig,InflationInfo,Balance,Range,ParachainStakingConfig,
 };
+
+use sp_runtime::Perbill;
+//use nimbus_primitives::NimbusId;
+
+// pub mod constants;
+// use constants::{currency::*};
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<rococo_parachain_runtime::GenesisConfig, Extensions>;
@@ -185,6 +191,27 @@ pub fn staging_test_net(id: ParaId) -> ChainSpec {
 	)
 }
 
+pub fn ares_inflation_config() -> InflationInfo<Balance> {
+	InflationInfo {
+		expect: Range {
+			min: 100_000 * AMAS_UNITS,
+			ideal: 200_000 * AMAS_UNITS,
+			max: 500_000 * AMAS_UNITS,
+		},
+		annual: Range {
+			min: Perbill::from_percent(4),
+			ideal: Perbill::from_percent(5),
+			max: Perbill::from_percent(5),
+		},
+		// 8766 rounds (hours) in a year
+		round: Range {
+			min: Perbill::from_parts(Perbill::from_percent(4).deconstruct() / 8766),
+			ideal: Perbill::from_parts(Perbill::from_percent(5).deconstruct() / 8766),
+			max: Perbill::from_parts(Perbill::from_percent(5).deconstruct() / 8766),
+		},
+	}
+}
+
 fn testnet_genesis(
 	root_key: AccountId,
 	invulnerables: Vec<(AccountId, AuraId)>,
@@ -245,6 +272,15 @@ fn testnet_genesis(
 		aura_ext: Default::default(),
 		parachain_system: Default::default(),
 		vesting: rococo_parachain_runtime::VestingConfig { vesting: vec![] },
+		parachain_staking: ParachainStakingConfig {
+			candidates: candidates
+				.iter()
+				.cloned()
+				.map(|(account, _, bond)| (account, bond))
+				.collect(),
+			nominations,
+			inflation_config: ares_inflation_config(),
+		},
 	}
 }
 
