@@ -30,8 +30,9 @@ use rococo_parachain_runtime::{
 use sp_runtime::Perbill;
 use nimbus_primitives::NimbusId;
 
-// pub mod constants;
-// use constants::{currency::*};
+
+//pub mod rococo_parachain_runtime::constants;
+use rococo_parachain_runtime::constants;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<rococo_parachain_runtime::GenesisConfig, Extensions>;
@@ -84,7 +85,7 @@ pub fn get_chain_spec(id: ParaId) -> ChainSpec {
 					//AccountId::from_str("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac").unwrap(),
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_from_seed::<NimbusId>("Alice"),
-					1_000 * AMAS_UNITS,
+					1_000 * constants::currency::AMAS_UNITS,
 				)],
 				vec![],
 				get_account_id_from_seed::<sr25519::Public>("Alice"),
@@ -159,7 +160,7 @@ pub fn staging_test_net(id: ParaId) -> ChainSpec {
 					//AccountId::from_str("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac").unwrap(),
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_from_seed::<NimbusId>("Alice"),
-					1_000 * AMAS_UNITS,
+					1_000 * constants::currency::AMAS_UNITS,
 				)],
 				vec![],
 				hex!["aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019"].into(),
@@ -208,9 +209,9 @@ pub fn staging_test_net(id: ParaId) -> ChainSpec {
 pub fn ares_inflation_config() -> InflationInfo<Balance> {
 	InflationInfo {
 		expect: Range {
-			min: 100_000 * AMAS_UNITS,
-			ideal: 200_000 * AMAS_UNITS,
-			max: 500_000 * AMAS_UNITS,
+			min: 100_000 * constants::currency::AMAS_UNITS,
+			ideal: 200_000 * constants::currency::AMAS_UNITS,
+			max: 500_000 * constants::currency::AMAS_UNITS,
 		},
 		annual: Range {
 			min: Perbill::from_percent(4),
