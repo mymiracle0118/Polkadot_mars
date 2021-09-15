@@ -6811,6 +6811,7 @@ dependencies = [
  "hex-literal 0.2.1",
  "jsonrpc-core",
  "log",
+ "nimbus-primitives",
  "nix",
  "parity-scale-codec",
  "parking_lot 0.10.2",
