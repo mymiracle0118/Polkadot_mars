@@ -81,7 +81,8 @@ pub fn get_chain_spec(id: ParaId) -> ChainSpec {
 		move || {
 			testnet_genesis(
 				vec![(
-					AccountId::from_str("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac").unwrap(),
+					//AccountId::from_str("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac").unwrap(),
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_from_seed::<NimbusId>("Alice"),
 					1_000 * AMAS_UNITS,
 				)],
@@ -155,7 +156,8 @@ pub fn staging_test_net(id: ParaId) -> ChainSpec {
 		move || {
 			testnet_genesis(
 				vec![(
-					AccountId::from_str("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac").unwrap(),
+					//AccountId::from_str("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac").unwrap(),
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_from_seed::<NimbusId>("Alice"),
 					1_000 * AMAS_UNITS,
 				)],
