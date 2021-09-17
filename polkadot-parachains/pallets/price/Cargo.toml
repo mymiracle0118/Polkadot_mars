@@ -1,5 +1,5 @@
 [package]
-name = 'pallet-bridge'
+name = 'pallet-price'
 authors = ['Anonymous']
 description = 'FRAME pallet template for defining custom runtime logic.'
 version = '3.0.0'

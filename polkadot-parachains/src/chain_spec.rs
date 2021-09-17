@@ -85,8 +85,14 @@ pub fn get_chain_spec(id: ParaId) -> ChainSpec {
 					//AccountId::from_str("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac").unwrap(),
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_from_seed::<NimbusId>("Alice"),
-					1_000 * constants::currency::AMAS_UNITS,
-				)],
+					1000 * constants::currency::AMAS_UNITS, //1000
+				),
+				(
+					get_account_id_from_seed::<sr25519::Public>("Bob"),
+					get_from_seed::<NimbusId>("Bob"),
+					1000 * constants::currency::AMAS_UNITS, //1000
+				),
+			],
 				vec![],
 				get_account_id_from_seed::<sr25519::Public>("Alice"),
 				// initial collators.
@@ -160,8 +166,14 @@ pub fn staging_test_net(id: ParaId) -> ChainSpec {
 					//AccountId::from_str("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac").unwrap(),
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_from_seed::<NimbusId>("Alice"),
-					1_000 * constants::currency::AMAS_UNITS,
-				)],
+					1000 * constants::currency::AMAS_UNITS,
+				),
+				(
+					get_account_id_from_seed::<sr25519::Public>("Bob"),
+					get_from_seed::<NimbusId>("Bob"),
+					1000 * constants::currency::AMAS_UNITS, //1000
+				),
+			],
 				vec![],
 				hex!["aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019"].into(),
 				vec![

@@ -91,6 +91,8 @@ mod part_scheduler;
 mod part_multisig;
 mod part_proxy;
 mod part_vesting;
+mod part_price;
+mod part_getprice;
 
 pub type SessionHandlers = ();
 
@@ -441,29 +443,6 @@ impl cumulus_ping::Config for Runtime {
 }
 
 parameter_types! {
-	pub const BridgePalletID: u8 = 100;
-	pub const BridgeMethodID: u8 = 0;
-	pub const BridgeWeightAtMost: u64 = 1000;
-}
-
-impl pallet_getprice::Config for Runtime {
-	type Event = Event;
-	type Origin = Origin;
-	type Call = Call;
-	type XcmSender = XcmRouter;
-	type BridgePalletID = BridgePalletID;
-	type BridgeMethodID = BridgeMethodID;
-	type BridgeWeightAtMost = BridgeWeightAtMost;
-}
-
-impl pallet_bridge::Config for Runtime {
-	type Event = Event;
-	type Origin = Origin;
-	type Call = Call;
-	type XcmSender = XcmRouter;
-}
-
-parameter_types! {
 	pub const AssetDeposit: Balance = 1 * ROC;
 	pub const ApprovalDeposit: Balance = 100 * MILLIROC;
 	pub const AssetsStringLimit: u32 = 50;
@@ -566,10 +545,11 @@ construct_runtime! {
 			Pallet, Call, Config, Storage, Inherent, Event<T>, ValidateUnsigned,
 		} = 20,
 		ParachainInfo: parachain_info::{Pallet, Storage, Config} = 21,
-		ParachainStaking: parachain_staking::{Pallet, Call, Storage, Event<T>, Config<T>} = 22,
+		
 
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>} = 30,
-		Assets: pallet_assets::{Pallet, Call, Storage, Event<T>} = 31,
+		ParachainStaking: parachain_staking::{Pallet, Call, Storage, Event<T>, Config<T>} = 31,
+		Assets: pallet_assets::{Pallet, Call, Storage, Event<T>} = 32,
 
 		// Ares the order of these 4 are important and shall not change.
 		Authorship: pallet_authorship::{Pallet, Call, Storage, Inherent},
@@ -597,7 +577,7 @@ construct_runtime! {
 		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 53,
 
 		Spambot: cumulus_ping::{Pallet, Call, Storage, Event<T>} = 99,
-		Bridge: pallet_bridge::{Pallet, Call, Storage, Event<T>} = 100,
+		Price: pallet_price::{Pallet, Call, Storage, Event<T>} = 100,
 		GetPrice: pallet_getprice::{Pallet, Call, Storage, Event<T>} = 101,
 
 		OCWModule: pallet_ocw::{Pallet, Call, Storage, Event<T>, ValidateUnsigned},
