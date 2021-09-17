@@ -76,6 +76,9 @@ cumulus-client-network = { path = "../client/network" }
 cumulus-primitives-core = { path = "../primitives/core" }
 cumulus-primitives-parachain-inherent = { path = "../primitives/parachain-inherent" }
 
+# TODO we should be able to depend only on the primitives crate once we move the inherent data provider there.
+nimbus-primitives = { git = "https://github.com/purestake/cumulus", branch = "nimbus-polkadot-v0.9.9" }
+
 # Polkadot dependencies
 polkadot-primitives = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.9" }
 polkadot-service = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.9" }

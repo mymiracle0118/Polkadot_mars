@@ -24,8 +24,15 @@ use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 use rococo_parachain_runtime::{
-	CouncilConfig,TechnicalCommitteeConfig,DemocracyConfig,
+	CouncilConfig,TechnicalCommitteeConfig,DemocracyConfig,InflationInfo,Balance,Range,ParachainStakingConfig,
 };
+
+use sp_runtime::Perbill;
+use nimbus_primitives::NimbusId;
+
+
+//pub mod rococo_parachain_runtime::constants;
+use rococo_parachain_runtime::constants;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<rococo_parachain_runtime::GenesisConfig, Extensions>;
@@ -74,6 +81,19 @@ pub fn get_chain_spec(id: ParaId) -> ChainSpec {
 		ChainType::Local,
 		move || {
 			testnet_genesis(
+				vec![(
+					//AccountId::from_str("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac").unwrap(),
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
+					get_from_seed::<NimbusId>("Alice"),
+					1000 * constants::currency::AMAS_UNITS, //1000
+				),
+				(
+					get_account_id_from_seed::<sr25519::Public>("Bob"),
+					get_from_seed::<NimbusId>("Bob"),
+					1000 * constants::currency::AMAS_UNITS, //1000
+				),
+			],
+				vec![],
 				get_account_id_from_seed::<sr25519::Public>("Alice"),
 				// initial collators.
 				vec![
@@ -142,6 +162,19 @@ pub fn staging_test_net(id: ParaId) -> ChainSpec {
 		ChainType::Live,
 		move || {
 			testnet_genesis(
+				vec![(
+					//AccountId::from_str("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac").unwrap(),
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
+					get_from_seed::<NimbusId>("Alice"),
+					1000 * constants::currency::AMAS_UNITS,
+				),
+				(
+					get_account_id_from_seed::<sr25519::Public>("Bob"),
+					get_from_seed::<NimbusId>("Bob"),
+					1000 * constants::currency::AMAS_UNITS, //1000
+				),
+			],
+				vec![],
 				hex!["aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019"].into(),
 				vec![
 					(
@@ -185,7 +218,30 @@ pub fn staging_test_net(id: ParaId) -> ChainSpec {
 	)
 }
 
+pub fn ares_inflation_config() -> InflationInfo<Balance> {
+	InflationInfo {
+		expect: Range {
+			min: 100_000 * constants::currency::AMAS_UNITS,
+			ideal: 200_000 * constants::currency::AMAS_UNITS,
+			max: 500_000 * constants::currency::AMAS_UNITS,
+		},
+		annual: Range {
+			min: Perbill::from_percent(4),
+			ideal: Perbill::from_percent(5),
+			max: Perbill::from_percent(5),
+		},
+		// 8766 rounds (hours) in a year
+		round: Range {
+			min: Perbill::from_parts(Perbill::from_percent(4).deconstruct() / 8766),
+			ideal: Perbill::from_parts(Perbill::from_percent(5).deconstruct() / 8766),
+			max: Perbill::from_parts(Perbill::from_percent(5).deconstruct() / 8766),
+		},
+	}
+}
+
 fn testnet_genesis(
+	candidates: Vec<(AccountId, NimbusId, Balance)>,
+	nominations: Vec<(AccountId, AccountId, Balance)>,
 	root_key: AccountId,
 	invulnerables: Vec<(AccountId, AuraId)>,
 	// initial_authorities: Vec<AuraId>,
@@ -245,6 +301,15 @@ fn testnet_genesis(
 		aura_ext: Default::default(),
 		parachain_system: Default::default(),
 		vesting: rococo_parachain_runtime::VestingConfig { vesting: vec![] },
+		parachain_staking: ParachainStakingConfig {
+			candidates: candidates
+				.iter()
+				.cloned()
+				.map(|(account, _, bond)| (account, bond))
+				.collect(),
+			nominations,
+			inflation_config: ares_inflation_config(),
+		},
 	}
 }
 

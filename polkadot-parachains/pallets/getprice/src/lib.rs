@@ -44,11 +44,11 @@ pub mod pallet {
 		/// The XCM sender module.
 		type XcmSender: SendXcm;
 
-		type BridgePalletID: Get<u8>;
+		type PricePalletID: Get<u8>;
 
-		type BridgeMethodID: Get<u8>;
+		type PriceMethodID: Get<u8>;
 
-		type BridgeWeightAtMost: Get<u64>;
+		type PriceWeightAtMost: Get<u64>;
 	}
 
 	#[pallet::pallet]
@@ -82,15 +82,15 @@ pub mod pallet {
 
 			// compose the call with pallet id, method id and arguments
 			let call = GetPriceCall::<T::AccountId>::new(
-				T::BridgePalletID::get(), 
-				T::BridgeMethodID::get(),
+				T::PricePalletID::get(), 
+				T::PriceMethodID::get(),
 				who.clone(),
 				symbol.clone());
 	
 			// build the xcm transact message
 			let message = Xcm::Transact { 
 				origin_type: OriginKind::Native, 
-				require_weight_at_most: T::BridgeWeightAtMost::get(), 
+				require_weight_at_most: T::PriceWeightAtMost::get(), 
 				call: call.encode().into() };
 			
 			// send the message to xregister server chain
