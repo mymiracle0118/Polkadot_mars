@@ -1232,6 +1232,7 @@ pub mod pallet {
 		/// in the next block
 		/// - also updates per-round inflation config
 		pub fn set_blocks_per_round(origin: OriginFor<T>, new: u32) -> DispatchResultWithPostInfo {
+			log::info!("enter set_blocks_per_round");
 			frame_system::ensure_root(origin)?;
 			ensure!(
 				new >= T::MinBlocksPerRound::get(),
@@ -1710,12 +1711,14 @@ pub mod pallet {
 		}
 		fn pay_stakers(next: RoundIndex) {
 			// payout is next - duration rounds ago => next - duration > 0 else return early
+			log::info!("enter pay_stakers");
 			let duration = T::RewardPaymentDelay::get();
 			if next <= duration {
 				return;
 			}
 			let round_to_payout = next - duration;
 			let total = <Points<T>>::get(round_to_payout);
+			log::info!("total:{:?}", total);
 			if total.is_zero() {
 				return;
 			}
@@ -1953,8 +1956,10 @@ pub mod pallet {
 	/// * 20 points to the block producer for producing a block in the chain
 	impl<T: Config> nimbus_primitives::EventHandler<T::AccountId> for Pallet<T> {
 		fn note_author(author: T::AccountId) {
+			log::info!("enter note_author");
 			let now = <Round<T>>::get().current;
 			let score_plus_20 = <AwardedPts<T>>::get(now, &author) + 20;
+			log::info!("now:{:?}, score plus 20:{:?}", now, score_plus_20);
 			<AwardedPts<T>>::insert(now, author, score_plus_20);
 			<Points<T>>::mutate(now, |x| *x += 20);
 		}
