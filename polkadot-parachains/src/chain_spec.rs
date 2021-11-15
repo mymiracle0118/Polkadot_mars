@@ -47,6 +47,10 @@ pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Pu
 		.public()
 }
 
+// pub fn get_nimbus_public_id() {
+// 	<NimbusId>
+// }
+
 /// The extensions for the [`ChainSpec`].
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ChainSpecGroup, ChainSpecExtension)]
 #[serde(deny_unknown_fields)]
@@ -163,27 +167,26 @@ pub fn staging_test_net(id: ParaId) -> ChainSpec {
 		move || {
 			testnet_genesis(
 				vec![(
-					//AccountId::from_str("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac").unwrap(),
-					get_account_id_from_seed::<sr25519::Public>("Alice"),
-					get_from_seed::<NimbusId>("Alice"),
+					hex!["a4cbc9391b20d6dd89d1667165c355a524120fd10fe056ba80bb63f3057a0f73"].into(),
+					hex!["3caff95b42c408e7f0096ed4aaedb5524940c8c1a62f46c6289f34e7e5fb1166"].unchecked_into(),
 					1000 * constants::currency::AMAS_UNITS,
 				),
 				(
-					get_account_id_from_seed::<sr25519::Public>("Bob"),
-					get_from_seed::<NimbusId>("Bob"),
+					hex!["78b90fe626734aef1a03426a1ebeaf1a98d747d00c8ef250bf1e70b8bf87ab62"].into(),
+					hex!["86989f896cff3671e0fe36578712d555c9f4b71fe94c9d9516a0313cc789b505"].unchecked_into(),
 					1000 * constants::currency::AMAS_UNITS, //1000
 				),
 			],
 				vec![],
-				hex!["aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019"].into(),
+				hex!["a4cbc9391b20d6dd89d1667165c355a524120fd10fe056ba80bb63f3057a0f73"].into(),
 				vec![
 					(
-						hex!["aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019"].into(), //1//controller
-						hex!["aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019"].unchecked_into(),
+						hex!["a4cbc9391b20d6dd89d1667165c355a524120fd10fe056ba80bb63f3057a0f73"].into(), //1//collator
+						hex!["a4cbc9391b20d6dd89d1667165c355a524120fd10fe056ba80bb63f3057a0f73"].unchecked_into(),
 					),
 					(
-						hex!["74a173a22757ddc9790ed388953a1ed8a5933a421858533411b36ebd41d74165"].into(), //2//controller
-						hex!["74a173a22757ddc9790ed388953a1ed8a5933a421858533411b36ebd41d74165"].unchecked_into(),
+						hex!["78b90fe626734aef1a03426a1ebeaf1a98d747d00c8ef250bf1e70b8bf87ab62"].into(), //2//collator
+						hex!["78b90fe626734aef1a03426a1ebeaf1a98d747d00c8ef250bf1e70b8bf87ab62"].unchecked_into(),
 					),
 				],
 				// vec![
@@ -195,10 +198,8 @@ pub fn staging_test_net(id: ParaId) -> ChainSpec {
 				// 		.unchecked_into(),
 				// ],
 				vec![
-					hex!["aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019"].into(),
-					hex!["74a173a22757ddc9790ed388953a1ed8a5933a421858533411b36ebd41d74165"].into(),
-					hex!["9e55f821f7b3484f15942af308001c32f113f31444f420a77422702907510669"].into(),
-					hex!["587bae319ecaee13ce2dbdedfc6d66eb189e5af427666b21b4d4a08c7af0671c"].into(),
+					hex!["a4cbc9391b20d6dd89d1667165c355a524120fd10fe056ba80bb63f3057a0f73"].into(),
+					hex!["78b90fe626734aef1a03426a1ebeaf1a98d747d00c8ef250bf1e70b8bf87ab62"].into(),
 				],
 				id,
 			)
