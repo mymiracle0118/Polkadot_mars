@@ -61,6 +61,7 @@ sp-offchain = { git = "https://github.com/paritytech/substrate", branch = "polka
 sp-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.9" }
 sp-consensus-aura = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.9" }
 substrate-prometheus-endpoint = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.9" }
+frame-support = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.9" }
 
 # RPC related dependencies
 jsonrpc-core = "15.1.0"

@@ -442,6 +442,8 @@ pub fn run() -> Result<()> {
 					}
 				);
 
+
+
 				if config.chain_spec.is_statemint() {
 					crate::service::start_statemint_node::<statemint_runtime::RuntimeApi, StatemintRuntimeExecutor>(
 						config,
@@ -475,7 +477,20 @@ pub fn run() -> Result<()> {
 						.map(|r| r.0)
 						.map_err(Into::into)
 				} else {
-					crate::service::start_rococo_parachain_node(config, polkadot_config, id)
+
+					// ares params
+					let mut ares_params: Vec<(&str,Option<Vec<u8>>)> = Vec::new();
+					let request_base = match cli.warehouse {
+						None => {
+							panic!("⛔ Start parameter `--warehouse` is required!");
+						}
+						Some(request_url) => {
+							request_url.as_str().as_bytes().to_vec()
+						}
+					};
+					ares_params.push(("request-base", Some(request_base)));
+
+					crate::service::start_rococo_parachain_node(config, polkadot_config, id, ares_params)
 						.await
 						.map(|r| r.0)
 						.map_err(Into::into)
