@@ -8,6 +8,7 @@ polkadot_argument_parsing
 
 /data
 **/*.private.md
+**/*.private.sh
 /test-relay-chain-rococo
 
 **/*.curl

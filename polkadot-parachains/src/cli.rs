@@ -110,6 +110,9 @@ pub struct Cli {
 	/// Relaychain arguments
 	#[structopt(raw = true)]
 	pub relaychain_args: Vec<String>,
+
+	#[structopt(long = "warehouse")]
+	pub warehouse: Option<String>,
 }
 
 #[derive(Debug)]

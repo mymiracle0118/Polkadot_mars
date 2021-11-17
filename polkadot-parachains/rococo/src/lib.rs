@@ -82,8 +82,8 @@ mod weights;
 mod part_utility;
 mod part_authorship;
 mod part_session_and_collatorselection;
-mod part_ocw;
 mod part_collective;
+pub mod part_ocw;
 mod part_treasury;
 mod part_bounties;
 mod part_democracy;
@@ -91,8 +91,10 @@ mod part_scheduler;
 mod part_multisig;
 mod part_proxy;
 mod part_vesting;
-mod part_price;
-mod part_getprice;
+// mod part_price;
+// mod part_getprice;
+mod part_member_extend;
+mod part_ocw_finance;
 
 pub type SessionHandlers = ();
 
@@ -570,6 +572,11 @@ construct_runtime! {
 		Vesting: pallet_vesting::{Pallet, Call, Storage, Event<T>, Config<T>},
 		// Staking: pallet_staking::{Pallet, Call, Config<T>, Storage, Event<T>},
 
+		//
+		MemberExtend: member_extend::{Pallet},
+		OCWModule: pallet_ocw::{Pallet, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
+		OcwFinance: ocw_finance::{Pallet, Call, Storage, Event<T>},
+
 		// XCM helpers.
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 50,
 		PolkadotXcm: pallet_xcm::{Pallet, Call, Event<T>, Origin} = 51,
@@ -577,11 +584,9 @@ construct_runtime! {
 		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 53,
 
 		Spambot: cumulus_ping::{Pallet, Call, Storage, Event<T>} = 99,
-		Price: pallet_price::{Pallet, Call, Storage, Event<T>} = 100,
-		GetPrice: pallet_getprice::{Pallet, Call, Storage, Event<T>} = 101,
+		// Price: pallet_price::{Pallet, Call, Storage, Event<T>} = 100,
+		// GetPrice: pallet_getprice::{Pallet, Call, Storage, Event<T>} = 101,
 
-		OCWModule: pallet_ocw::{Pallet, Call, Storage, Event<T>, ValidateUnsigned},
-		
 	}
 }
 

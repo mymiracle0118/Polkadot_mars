@@ -31,7 +31,7 @@ use cumulus_primitives_core::{
 
 use cumulus_client_consensus_relay_chain::Verifier as RelayChainVerifier;
 use futures::lock::Mutex;
-use sc_client_api::ExecutorProvider;
+use sc_client_api::{ExecutorProvider, Backend};
 use sc_consensus::{
 	import_queue::{BasicQueue, Verifier as VerifierT},
 	BlockImportParams,
@@ -44,14 +44,13 @@ use sp_api::{ApiExt, ConstructRuntimeApi};
 use sp_consensus::{CacheKeyId, SlotData};
 use sp_consensus_aura::{sr25519::AuthorityId as AuraId, AuraApi};
 use sp_keystore::SyncCryptoStorePtr;
-use sp_runtime::{
-	generic::BlockId,
-	traits::{BlakeTwo256, Header as HeaderT},
-};
+use sp_runtime::{generic::BlockId, traits::{BlakeTwo256, Header as HeaderT}, sp_std};
 use std::sync::Arc;
 use substrate_prometheus_endpoint::Registry;
 
 pub use sc_executor::NativeExecutor;
+use sp_core::offchain::{OffchainStorage, STORAGE_PREFIX};
+use frame_support::pallet_prelude::Encode;
 
 type BlockNumber = u32;
 type Header = sp_runtime::generic::Header<BlockNumber, sp_runtime::traits::BlakeTwo256>;
@@ -64,6 +63,11 @@ native_executor_instance!(
 	rococo_parachain_runtime::api::dispatch,
 	rococo_parachain_runtime::native_version,
 );
+
+use rococo_parachain_runtime::{
+	part_ocw::LOCAL_STORAGE_PRICE_REQUEST_DOMAIN
+};
+// use parity_scale_codec::Encode;
 
 // Native executor instance.
 native_executor_instance!(
@@ -420,6 +424,7 @@ pub async fn start_rococo_parachain_node(
 	parachain_config: Configuration,
 	polkadot_config: Configuration,
 	id: ParaId,
+	ares_params: Vec<(&str, Option<Vec<u8>>)>,
 ) -> sc_service::error::Result<(
 	TaskManager,
 	Arc<TFullClient<Block, rococo_parachain_runtime::RuntimeApi, RococoParachainRuntimeExecutor>>,
@@ -451,6 +456,38 @@ pub async fn start_rococo_parachain_node(
 
 			let relay_chain_backend = relay_chain_node.backend.clone();
 			let relay_chain_client = relay_chain_node.client.clone();
+
+			log::info!("setting ares_params: {:?}", ares_params);
+			let backend_clone = relay_chain_backend.clone();
+			let result: Vec<(&str, bool)> = ares_params
+				.iter()
+				.map(|(order, x)| {
+					match order {
+						&"request-base" => {
+							match x {
+								None => (*order, false),
+								Some(exe_vecu8) => {
+									let request_base_str = sp_std::str::from_utf8(exe_vecu8).unwrap();
+									let store_request_u8 = request_base_str.encode();
+									log::info!("setting request_domain: {:?}", request_base_str);
+									if let Some(mut offchain_db) = backend_clone.offchain_storage() {
+										log::debug!("after setting request_domain: {:?}", request_base_str);
+										offchain_db.set(
+											STORAGE_PREFIX,
+											LOCAL_STORAGE_PRICE_REQUEST_DOMAIN,
+											store_request_u8.as_slice(),
+										);
+									}
+									(*order, true)
+								}
+							}
+						}
+						&_ => ("NONE", false),
+					}
+				}).collect();
+
+			log::info!("Results of Ares settings:{:?}", result);
+
 			Ok(build_aura_consensus::<
 				sp_consensus_aura::sr25519::AuthorityPair,
 				_,
@@ -504,6 +541,8 @@ pub async fn start_rococo_parachain_node(
 				// And a maximum of 750ms if slots are skipped
 				max_block_proposal_slot_portion: Some(SlotProportion::new(1f32 / 16f32)),
 				telemetry,
+
+
 			}))
 		},
 	)
