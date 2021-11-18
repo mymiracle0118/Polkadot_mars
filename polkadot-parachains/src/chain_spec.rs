@@ -159,9 +159,9 @@ pub fn get_shell_chain_spec(id: ParaId) -> ShellChainSpec {
 	)
 }
 
-pub fn staging_test_net(id: ParaId) -> ChainSpec {
+pub fn mars_test_net(id: ParaId) -> ChainSpec {
 	ChainSpec::from_genesis(
-		"Mars Testnet",
+		"Ares Pc1",
 		"mars_testnet",
 		ChainType::Live,
 		move || {
@@ -215,6 +215,67 @@ pub fn staging_test_net(id: ParaId) -> ChainSpec {
 		),
 		Extensions {
 			relay_chain: "kusama".into(),
+			para_id: id.into(),
+		},
+	)
+}
+
+pub fn odyssey_test_net(id: ParaId) -> ChainSpec {
+	ChainSpec::from_genesis(
+		"Ares Odyssey",
+		"ares_odyssey",
+		ChainType::Live,
+		move || {
+			testnet_genesis(
+				vec![(
+						 hex!["a4cbc9391b20d6dd89d1667165c355a524120fd10fe056ba80bb63f3057a0f73"].into(),
+						 hex!["3caff95b42c408e7f0096ed4aaedb5524940c8c1a62f46c6289f34e7e5fb1166"].unchecked_into(),
+						 1000 * constants::currency::AMAS_UNITS,
+					 ),
+					 (
+						 hex!["78b90fe626734aef1a03426a1ebeaf1a98d747d00c8ef250bf1e70b8bf87ab62"].into(),
+						 hex!["86989f896cff3671e0fe36578712d555c9f4b71fe94c9d9516a0313cc789b505"].unchecked_into(),
+						 1000 * constants::currency::AMAS_UNITS, //1000
+					 ),
+				],
+				vec![],
+				hex!["a4cbc9391b20d6dd89d1667165c355a524120fd10fe056ba80bb63f3057a0f73"].into(),
+				vec![
+					(
+						hex!["a4cbc9391b20d6dd89d1667165c355a524120fd10fe056ba80bb63f3057a0f73"].into(), //1//collator
+						get_collator_keys_from_seed("blur pioneer frown science banana impose avoid law act strategy have bronze//1//candidate"),
+					),
+					(
+						hex!["78b90fe626734aef1a03426a1ebeaf1a98d747d00c8ef250bf1e70b8bf87ab62"].into(), //2//collator
+						get_collator_keys_from_seed("blur pioneer frown science banana impose avoid law act strategy have bronze//2//candidate"),
+					),
+				],
+				// vec![
+				// 	// $secret//one
+				// 	hex!["aad9fa2249f87a210a0f93400b7f90e47b810c6d65caa0ca3f5af982904c2a33"]
+				// 		.unchecked_into(),
+				// 	// $secret//two
+				// 	hex!["d47753f0cca9dd8da00c70e82ec4fc5501a69c49a5952a643d18802837c88212"]
+				// 		.unchecked_into(),
+				// ],
+				vec![
+					hex!["a4cbc9391b20d6dd89d1667165c355a524120fd10fe056ba80bb63f3057a0f73"].into(),
+					hex!["78b90fe626734aef1a03426a1ebeaf1a98d747d00c8ef250bf1e70b8bf87ab62"].into(),
+					hex!["26f58381475d9b159a09864132ec0c5250cf985e2ed68c541446c4f2524e4d36"].into(),
+				],
+				id,
+			)
+		},
+		Vec::new(),
+		None,
+		None,
+		Some(
+			serde_json::from_str(
+				"{\"tokenDecimals\": 12, \"tokenSymbol\": \"ARES\", \"SS58Prefix\": 34}",
+			).expect("Provided valid json map"),
+		),
+		Extensions {
+			relay_chain: "polkadot".into(),
 			para_id: id.into(),
 		},
 	)

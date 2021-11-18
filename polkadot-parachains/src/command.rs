@@ -81,7 +81,7 @@ fn load_spec(
 	para_id: ParaId,
 ) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
 	Ok(match id {
-		"staging" => Box::new(chain_spec::staging_test_net(para_id)),
+		"staging" => Box::new(chain_spec::mars_test_net(para_id)),
 		"tick" => Box::new(chain_spec::ChainSpec::from_json_bytes(
 			&include_bytes!("../res/tick.json")[..],
 		)?),
@@ -110,7 +110,8 @@ fn load_spec(
 		"westmint" => Box::new(chain_spec::ChainSpec::from_json_bytes(
 			&include_bytes!("../res/westmint.json")[..],
 		)?),
-		"mars" => Box::new(chain_spec::staging_test_net(para_id)),
+		"mars" => Box::new(chain_spec::mars_test_net(para_id)),
+		"odyssey" => Box::new(chain_spec::odyssey_test_net(para_id)),
 		"" => Box::new(chain_spec::get_chain_spec(para_id)),
 		// "" => Box::new(chain_spec::staging_test_net(para_id)),
 		path => {
