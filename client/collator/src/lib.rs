@@ -188,11 +188,7 @@ where
 		relay_parent: PHash,
 		validation_data: PersistedValidationData,
 	) -> Option<CollationResult> {
-		tracing::trace!(
-			target: LOG_TARGET,
-			relay_parent = ?relay_parent,
-			"Producing candidate",
-		);
+
 
 		let last_head = match Block::Header::decode(&mut &validation_data.parent_head.0[..]) {
 			Ok(x) => x,
@@ -218,13 +214,17 @@ where
 			"Starting collation.",
 		);
 
+		log::info!("*** LINDEBUG:: start_collator B1 important!");
 		let candidate = self
 			.parachain_consensus
 			.produce_candidate(&last_head, relay_parent, &validation_data)
 			.await?;
 
+		log::info!("*** LINDEBUG:: start_collator B3 ");
+
 		let (header, extrinsics) = candidate.block.deconstruct();
 
+		log::info!("*** LINDEBUG:: start_collator B4 ");
 		let compact_proof = match candidate
 			.proof
 			.into_compact_proof::<HashFor<Block>>(last_head.state_root().clone())
@@ -236,9 +236,12 @@ where
 			}
 		};
 
+		log::info!("*** LINDEBUG:: start_collator B5 ");
+
 		// Create the parachain block data for the validators.
 		let b = ParachainBlockData::<Block>::new(header, extrinsics, compact_proof);
 
+		log::info!("*** LINDEBUG:: start_collator B6 ");
 		tracing::info!(
 			target: LOG_TARGET,
 			"PoV size {{ header: {}kb, extrinsics: {}kb, storage_proof: {}kb }}",
@@ -249,6 +252,8 @@ where
 
 		let block_hash = b.header().hash();
 		let collation = self.build_collation(b, block_hash)?;
+
+		log::info!("*** LINDEBUG:: start_collator B7 ");
 
 		let (result_sender, signed_stmt_recv) = oneshot::channel();
 
@@ -261,6 +266,8 @@ where
 			?block_hash,
 			"Produced proof-of-validity candidate.",
 		);
+
+		log::info!("*** LINDEBUG:: start_collator B8 ");
 
 		Some(CollationResult {
 			collation,
@@ -308,29 +315,37 @@ pub async fn start_collator<Block, RA, BS, Spawner>(
 		parachain_consensus,
 	);
 
+	log::info!("*** LINDEBUG:: start_collator A1 ",);
+
 	let span = tracing::Span::current();
 	let config = CollationGenerationConfig {
 		key,
 		para_id,
 		collator: Box::new(move |relay_parent, validation_data| {
+			log::info!("*** LINDEBUG:: start_collator A2 important! : validation_data.relay_parent_number = {:} ", &validation_data.relay_parent_number );
 			let collator = collator.clone();
 			collator
+				// LINDEBUG:: goto produce_candidate()
 				.produce_candidate(relay_parent, validation_data.clone())
 				.instrument(span.clone())
 				.boxed()
 		}),
 	};
 
+	log::info!("*** LINDEBUG:: start_collator A3 ",);
 	overseer_handle
 		.send_msg(
 			CollationGenerationMessage::Initialize(config),
 			"StartCollator",
-		)
-		.await;
+		).await;
+
+	log::info!("*** LINDEBUG:: start_collator A4 ",);
 
 	overseer_handle
 		.send_msg(CollatorProtocolMessage::CollateOn(para_id), "StartCollator")
 		.await;
+
+	log::info!("*** LINDEBUG:: start_collator A5 ",);
 }
 
 #[cfg(test)]
@@ -370,6 +385,7 @@ mod tests {
 			_: PHash,
 			validation_data: &PersistedValidationData,
 		) -> Option<ParachainCandidate<Block>> {
+			log::info!("*** LINDEBUG:: start_collator B2.4 ");
 			let block_id = BlockId::Hash(parent.hash());
 			let builder = self.client.init_block_builder_at(
 				&block_id,

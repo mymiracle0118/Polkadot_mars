@@ -39,6 +39,7 @@ sp-timestamp = { git = "https://github.com/paritytech/substrate", branch = "polk
 sp-transaction-pool = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.9" }
 sp-trie = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.9" }
 substrate-test-client = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.9" }
+log = "0.4.8"
 
 # Polkadot
 polkadot-primitives = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.9" }
