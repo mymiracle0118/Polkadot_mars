@@ -1713,6 +1713,7 @@ dependencies = [
  "frame-executive",
  "frame-support",
  "frame-system",
+ "log",
  "pallet-aura",
  "parity-scale-codec",
  "serde",

@@ -111,6 +111,10 @@ pub fn get_chain_spec(id: ParaId) -> ChainSpec {
 					),
 				],
 				vec![
+					get_from_seed::<AuraId>("Alice"),
+					get_from_seed::<AuraId>("Bob"),
+				],
+				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_account_id_from_seed::<sr25519::Public>("Bob"),
 					get_account_id_from_seed::<sr25519::Public>("Charlie"),
@@ -189,6 +193,10 @@ pub fn mars_test_net(id: ParaId) -> ChainSpec {
 						get_collator_keys_from_seed("blur pioneer frown science banana impose avoid law act strategy have bronze//2//candidate"),
 					),
 				],
+				vec![
+					get_from_seed::<AuraId>("Alice"),
+					get_from_seed::<AuraId>("Bob"),
+				],
 				// vec![
 				// 	// $secret//one
 				// 	hex!["aad9fa2249f87a210a0f93400b7f90e47b810c6d65caa0ca3f5af982904c2a33"]
@@ -249,6 +257,10 @@ pub fn odyssey_test_net(id: ParaId) -> ChainSpec {
 						hex!["78b90fe626734aef1a03426a1ebeaf1a98d747d00c8ef250bf1e70b8bf87ab62"].into(), //2//collator
 						get_collator_keys_from_seed("blur pioneer frown science banana impose avoid law act strategy have bronze//2//candidate"),
 					),
+				],
+				vec![
+					get_from_seed::<AuraId>("Alice"),
+					get_from_seed::<AuraId>("Bob"),
 				],
 				// vec![
 				// 	// $secret//one
