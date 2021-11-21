@@ -82,14 +82,14 @@ mod weights;
 mod part_utility;
 mod part_authorship;
 mod part_session_and_collatorselection;
-// mod part_collective;
-// mod part_treasury;
-// mod part_bounties;
-// mod part_democracy;
-// mod part_scheduler;
+mod part_collective;
+mod part_treasury;
+mod part_bounties;
+mod part_democracy;
+mod part_scheduler;
 mod part_multisig;
 mod part_proxy;
-// mod part_vesting;
+mod part_vesting;
 // // mod part_price;
 // // mod part_getprice;
 
@@ -582,16 +582,14 @@ construct_runtime! {
 		AuraExt: cumulus_pallet_aura_ext::{Pallet, Storage, Config},
 
 		// Governance
-		// Democracy: pallet_democracy::{Pallet, Call, Storage, Config<T>, Event<T>},
-		// Council: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
-		// TechnicalCommittee: pallet_collective::<Instance2>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
-		// Treasury: pallet_treasury::{Pallet, Call, Storage, Config, Event<T>},
-		// Bounties: pallet_bounties::{Pallet, Call, Storage, Event<T>},
-		// Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>},
-		// Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>},
-		// Proxy: pallet_proxy::{Pallet, Call, Storage, Event<T>},
-		// Vesting: pallet_vesting::{Pallet, Call, Storage, Event<T>, Config<T>},
-		// // Staking: pallet_staking::{Pallet, Call, Config<T>, Storage, Event<T>},
+		Democracy: pallet_democracy::{Pallet, Call, Storage, Config<T>, Event<T>},
+		Council: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
+		TechnicalCommittee: pallet_collective::<Instance2>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
+		Treasury: pallet_treasury::{Pallet, Call, Storage, Config, Event<T>},
+		Bounties: pallet_bounties::{Pallet, Call, Storage, Event<T>},
+		Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>},
+		Vesting: pallet_vesting::{Pallet, Call, Storage, Event<T>, Config<T>},
+		// Staking: pallet_staking::{Pallet, Call, Config<T>, Storage, Event<T>},
 
 		//
 		// MemberExtend: member_extend::{Pallet},
