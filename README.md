@@ -1,5 +1,7 @@
 # Cumulus :cloud:
 
+curl http://localhost:9961  -H "Content-Type:application/json;charset=utf-8" -d "@ocw-aura-alice-01.curl"
+
 A set of tools for writing [Substrate](https://substrate.dev/)-based
 [Polkadot](https://wiki.polkadot.network/en/)
 [parachains](https://wiki.polkadot.network/docs/en/learn-parachains). Refer to the included

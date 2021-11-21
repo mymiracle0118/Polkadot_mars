@@ -23,7 +23,6 @@
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
 use sp_api::impl_runtime_apis;
-use sp_core::OpaqueMetadata;
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{AccountIdLookup, BlakeTwo256, Block as BlockT, ConvertInto},
@@ -71,6 +70,7 @@ use xcm_builder::{
 	SovereignSignedViaLocation, TakeWeightCredit, UsingComponents,
 };
 use xcm_executor::{Config, XcmExecutor};
+use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 
 
 
@@ -82,25 +82,46 @@ mod weights;
 mod part_utility;
 mod part_authorship;
 mod part_session_and_collatorselection;
-mod part_collective;
-pub mod part_ocw;
-mod part_treasury;
-mod part_bounties;
-mod part_democracy;
-mod part_scheduler;
+// mod part_collective;
+// mod part_treasury;
+// mod part_bounties;
+// mod part_democracy;
+// mod part_scheduler;
 mod part_multisig;
 mod part_proxy;
-mod part_vesting;
-// mod part_price;
-// mod part_getprice;
-mod part_member_extend;
-mod part_ocw_finance;
+// mod part_vesting;
+// // mod part_price;
+// // mod part_getprice;
+
+// pub mod part_ocw;
+// mod part_member_extend;
+// mod part_ocw_finance;
 
 pub type SessionHandlers = ();
 
-impl_opaque_keys! {
-	pub struct SessionKeys {
-		pub aura: Aura,
+// impl_opaque_keys! {
+// 	pub struct SessionKeys {
+// 		pub aura: Aura,
+// 	}
+// }
+
+/// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
+/// the specifics of the runtime. They can then be made to be agnostic over specific formats
+/// of data like extrinsics, allowing for them to continue syncing the network through upgrades
+/// to even the core data structures.
+pub mod opaque {
+	use super::*;
+	pub use sp_runtime::OpaqueExtrinsic as UncheckedExtrinsic;
+	/// Opaque block header type.
+	pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
+	/// Opaque block type.
+	pub type Block = generic::Block<Header, UncheckedExtrinsic>;
+	/// Opaque block identifier type.
+	pub type BlockId = generic::BlockId<Block>;
+	impl_opaque_keys! {
+		pub struct SessionKeys {
+			pub aura: Aura,
+		}
 	}
 }
 
@@ -437,12 +458,12 @@ impl cumulus_pallet_dmp_queue::Config for Runtime {
 	type ExecuteOverweightOrigin = frame_system::EnsureRoot<AccountId>;
 }
 
-impl cumulus_ping::Config for Runtime {
-	type Event = Event;
-	type Origin = Origin;
-	type Call = Call;
-	type XcmSender = XcmRouter;
-}
+// impl cumulus_ping::Config for Runtime {
+// 	type Event = Event;
+// 	type Origin = Origin;
+// 	type Call = Call;
+// 	type XcmSender = XcmRouter;
+// }
 
 parameter_types! {
 	pub const AssetDeposit: Balance = 1 * ROC;
@@ -508,27 +529,27 @@ parameter_types! {
 	pub const MinNominatorStk: u128 = 5 * AMAS_UNITS;
 }
 
-impl parachain_staking::Config for Runtime {
-	type Event = Event;
-	type Currency = Balances;
-	type MonetaryGovernanceOrigin = EnsureRoot<AccountId>;
-	type MinBlocksPerRound = MinBlocksPerRound;
-	type DefaultBlocksPerRound = DefaultBlocksPerRound;
-	type LeaveCandidatesDelay = LeaveCandidatesDelay;
-	type LeaveNominatorsDelay = LeaveNominatorsDelay;
-	type RevokeNominationDelay = RevokeNominationDelay;
-	type RewardPaymentDelay = RewardPaymentDelay;
-	type MinSelectedCandidates = MinSelectedCandidates;
-	type MaxNominatorsPerCollator = MaxNominatorsPerCollator;
-	type MaxCollatorsPerNominator = MaxCollatorsPerNominator;
-	type DefaultCollatorCommission = DefaultCollatorCommission;
-	type DefaultParachainBondReservePercent = DefaultParachainBondReservePercent;
-	type MinCollatorStk = MinCollatorStk;
-	type MinCollatorCandidateStk = MinCollatorCandidateStk;
-	type MinNomination = MinNominatorStk;
-	type MinNominatorStk = MinNominatorStk;
-	type WeightInfo = parachain_staking::weights::SubstrateWeight<Runtime>;
-}
+// impl parachain_staking::Config for Runtime {
+// 	type Event = Event;
+// 	type Currency = Balances;
+// 	type MonetaryGovernanceOrigin = EnsureRoot<AccountId>;
+// 	type MinBlocksPerRound = MinBlocksPerRound;
+// 	type DefaultBlocksPerRound = DefaultBlocksPerRound;
+// 	type LeaveCandidatesDelay = LeaveCandidatesDelay;
+// 	type LeaveNominatorsDelay = LeaveNominatorsDelay;
+// 	type RevokeNominationDelay = RevokeNominationDelay;
+// 	type RewardPaymentDelay = RewardPaymentDelay;
+// 	type MinSelectedCandidates = MinSelectedCandidates;
+// 	type MaxNominatorsPerCollator = MaxNominatorsPerCollator;
+// 	type MaxCollatorsPerNominator = MaxCollatorsPerNominator;
+// 	type DefaultCollatorCommission = DefaultCollatorCommission;
+// 	type DefaultParachainBondReservePercent = DefaultParachainBondReservePercent;
+// 	type MinCollatorStk = MinCollatorStk;
+// 	type MinCollatorCandidateStk = MinCollatorCandidateStk;
+// 	type MinNomination = MinNominatorStk;
+// 	type MinNominatorStk = MinNominatorStk;
+// 	type WeightInfo = parachain_staking::weights::SubstrateWeight<Runtime>;
+// }
 
 construct_runtime! {
 	pub enum Runtime where
@@ -537,45 +558,45 @@ construct_runtime! {
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system::{Pallet, Call, Storage, Config, Event<T>},
-		Utility: pallet_utility::{Pallet, Call, Event},
 		Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
 		Sudo: pallet_sudo::{Pallet, Call, Storage, Config<T>, Event<T>},
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage},
-		TransactionPayment: pallet_transaction_payment::{Pallet, Storage},
+
 
 		ParachainSystem: cumulus_pallet_parachain_system::{
 			Pallet, Call, Config, Storage, Inherent, Event<T>, ValidateUnsigned,
 		} = 20,
 		ParachainInfo: parachain_info::{Pallet, Storage, Config} = 21,
-		
+
 
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>} = 30,
-		ParachainStaking: parachain_staking::{Pallet, Call, Storage, Event<T>, Config<T>} = 31,
-		Assets: pallet_assets::{Pallet, Call, Storage, Event<T>} = 32,
+		TransactionPayment: pallet_transaction_payment::{Pallet, Storage},
+		// ParachainStaking: parachain_staking::{Pallet, Call, Storage, Event<T>, Config<T>} = 31,
+		// Assets: pallet_assets::{Pallet, Call, Storage, Event<T>} = 32,
 
 		// Ares the order of these 4 are important and shall not change.
-		Authorship: pallet_authorship::{Pallet, Call, Storage, Inherent},
+		Authorship: pallet_authorship::{Pallet, Call, Storage},
 		CollatorSelection: pallet_collator_selection::{Pallet, Call, Storage, Event<T>, Config<T>},
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
 		Aura: pallet_aura::{Pallet, Storage, Config<T>},
 		AuraExt: cumulus_pallet_aura_ext::{Pallet, Storage, Config},
 
 		// Governance
-		Democracy: pallet_democracy::{Pallet, Call, Storage, Config<T>, Event<T>},
-		Council: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
-		TechnicalCommittee: pallet_collective::<Instance2>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
-		Treasury: pallet_treasury::{Pallet, Call, Storage, Config, Event<T>},
-		Bounties: pallet_bounties::{Pallet, Call, Storage, Event<T>},
-		Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>},
-		Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>},
-		Proxy: pallet_proxy::{Pallet, Call, Storage, Event<T>},
-		Vesting: pallet_vesting::{Pallet, Call, Storage, Event<T>, Config<T>},
-		// Staking: pallet_staking::{Pallet, Call, Config<T>, Storage, Event<T>},
+		// Democracy: pallet_democracy::{Pallet, Call, Storage, Config<T>, Event<T>},
+		// Council: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
+		// TechnicalCommittee: pallet_collective::<Instance2>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
+		// Treasury: pallet_treasury::{Pallet, Call, Storage, Config, Event<T>},
+		// Bounties: pallet_bounties::{Pallet, Call, Storage, Event<T>},
+		// Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>},
+		// Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>},
+		// Proxy: pallet_proxy::{Pallet, Call, Storage, Event<T>},
+		// Vesting: pallet_vesting::{Pallet, Call, Storage, Event<T>, Config<T>},
+		// // Staking: pallet_staking::{Pallet, Call, Config<T>, Storage, Event<T>},
 
 		//
-		MemberExtend: member_extend::{Pallet},
-		OCWModule: pallet_ocw::{Pallet, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
-		OcwFinance: ocw_finance::{Pallet, Call, Storage, Event<T>},
+		// MemberExtend: member_extend::{Pallet},
+		// OCWModule: pallet_ocw::{Pallet, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
+		// OcwFinance: ocw_finance::{Pallet, Call, Storage, Event<T>},
 
 		// XCM helpers.
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 50,
@@ -583,9 +604,17 @@ construct_runtime! {
 		CumulusXcm: cumulus_pallet_xcm::{Pallet, Call, Event<T>, Origin} = 52,
 		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 53,
 
-		Spambot: cumulus_ping::{Pallet, Call, Storage, Event<T>} = 99,
+		// Handy utilities.
+		Utility: pallet_utility::{Pallet, Call, Event},
+		Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>},
+		Proxy: pallet_proxy::{Pallet, Call, Storage, Event<T>},
+
+		// Spambot: cumulus_ping::{Pallet, Call, Storage, Event<T>} = 99,
 		// Price: pallet_price::{Pallet, Call, Storage, Event<T>} = 100,
 		// GetPrice: pallet_getprice::{Pallet, Call, Storage, Event<T>} = 101,
+
+		Assets: pallet_assets::{Pallet, Call, Storage, Event<T>},
+		// Uniques: pallet_uniques::{Pallet, Call, Storage, Event<T>},
 
 	}
 }
@@ -693,15 +722,27 @@ impl_runtime_apis! {
 		}
 	}
 
+	// impl sp_session::SessionKeys<Block> for Runtime {
+	// 	fn decode_session_keys(
+	// 		encoded: Vec<u8>,
+	// 	) -> Option<Vec<(Vec<u8>, sp_core::crypto::KeyTypeId)>> {
+	// 		SessionKeys::decode_into_raw_public_keys(&encoded)
+	// 	}
+	//
+	// 	fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {
+	// 		SessionKeys::generate(seed)
+	// 	}
+	// }
+
 	impl sp_session::SessionKeys<Block> for Runtime {
-		fn decode_session_keys(
-			encoded: Vec<u8>,
-		) -> Option<Vec<(Vec<u8>, sp_core::crypto::KeyTypeId)>> {
-			SessionKeys::decode_into_raw_public_keys(&encoded)
+		fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {
+			opaque::SessionKeys::generate(seed)
 		}
 
-		fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {
-			SessionKeys::generate(seed)
+		fn decode_session_keys(
+			encoded: Vec<u8>,
+		) -> Option<Vec<(Vec<u8>, KeyTypeId)>> {
+			opaque::SessionKeys::decode_into_raw_public_keys(&encoded)
 		}
 	}
 

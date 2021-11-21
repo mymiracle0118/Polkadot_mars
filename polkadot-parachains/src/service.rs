@@ -64,10 +64,11 @@ native_executor_instance!(
 	rococo_parachain_runtime::native_version,
 );
 
-use rococo_parachain_runtime::{
-	part_ocw::LOCAL_STORAGE_PRICE_REQUEST_DOMAIN
-};
+// use rococo_parachain_runtime::{
+// 	part_ocw::LOCAL_STORAGE_PRICE_REQUEST_DOMAIN
+// };
 // use parity_scale_codec::Encode;
+const LOCAL_STORAGE_PRICE_REQUEST_DOMAIN: &[u8] = b"are-ocw::price_request_domain";
 
 // Native executor instance.
 native_executor_instance!(
