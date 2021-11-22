@@ -4797,7 +4797,6 @@ checksum = "60302e4db3a61da70c0cb7991976248362f30319e88850c487b9b95bbf059e00"
 [[package]]
 name = "member-extend"
 version = "3.0.3"
-source = "git+https://github.com/aresprotocols/ocw-suit.git?branch=monthly-2021-09+1#18297c7c61dac6392c6e1bbfd40fc9c18220da96"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5296,7 +5295,6 @@ dependencies = [
 [[package]]
 name = "ocw-finance"
 version = "3.0.4"
-source = "git+https://github.com/aresprotocols/ocw-suit.git?branch=monthly-2021-09+1#18297c7c61dac6392c6e1bbfd40fc9c18220da96"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -5840,7 +5838,6 @@ dependencies = [
 [[package]]
 name = "pallet-ocw"
 version = "3.2.8"
-source = "git+https://github.com/aresprotocols/ocw-suit.git?branch=monthly-2021-09+1#18297c7c61dac6392c6e1bbfd40fc9c18220da96"
 dependencies = [
  "frame-support",
  "frame-system",

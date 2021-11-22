@@ -93,9 +93,9 @@ mod part_vesting;
 // // mod part_price;
 // // mod part_getprice;
 
+mod part_ocw_finance;
+mod part_member_extend;
 // pub mod part_ocw;
-// mod part_member_extend;
-// mod part_ocw_finance;
 
 pub type SessionHandlers = ();
 
@@ -137,7 +137,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	transaction_version: 1,
 };
 
-pub const MILLISECS_PER_BLOCK: u64 = 6000;
+pub const MILLISECS_PER_BLOCK: u64 = 6000 * 2;
 
 pub const SLOT_DURATION: u64 = MILLISECS_PER_BLOCK;
 
@@ -592,9 +592,9 @@ construct_runtime! {
 		// Staking: pallet_staking::{Pallet, Call, Config<T>, Storage, Event<T>},
 
 		//
-		// MemberExtend: member_extend::{Pallet},
+		MemberExtend: member_extend::{Pallet},
+		OcwFinance: ocw_finance::{Pallet, Call, Storage, Event<T>},
 		// OCWModule: pallet_ocw::{Pallet, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
-		// OcwFinance: ocw_finance::{Pallet, Call, Storage, Event<T>},
 
 		// XCM helpers.
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 50,
