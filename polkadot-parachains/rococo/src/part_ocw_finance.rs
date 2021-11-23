@@ -21,5 +21,5 @@ impl ocw_finance::Config for Runtime {
     type AskPeriod = AskPeriod;
     type RewardPeriodCycle = RewardPeriodCycle;
     type RewardSlot = RewardSlot;
-    type OnSlash = Treasury;
+    type OnSlash = ();// Treasury;
 }

@@ -23,6 +23,7 @@ sc-consensus-slots = { git = "https://github.com/paritytech/substrate", branch =
 sc-telemetry = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.9" }
 sc-consensus = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.9" }
 substrate-prometheus-endpoint = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.9" }
+log = "0.4.8"
 
 # Polkadot dependencies
 polkadot-client = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.9" }

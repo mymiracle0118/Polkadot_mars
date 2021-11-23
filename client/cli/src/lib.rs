@@ -157,7 +157,7 @@ impl RunCmd {
 		 NormalizedRunCmd { 
 			 base: new_base,
 			 parachain_id: self.parachain_id,
-		}
+		 }
 	}
 }
 

@@ -9,15 +9,15 @@ use frame_support::traits::FindAuthor;
 use frame_support::ConsensusEngineId;
 use frame_support::sp_runtime::RuntimeAppPublic;
 use frame_support::sp_runtime::generic::SignedPayload;
-use crate::part_collective::TechnicalCollective;
+// use crate::part_collective::TechnicalCollective;
 use frame_support::sp_runtime::app_crypto::sp_core::u32_trait::{_1, _2};
 pub use pallet_ocw::LOCAL_STORAGE_PRICE_REQUEST_DOMAIN;
 
-pub type EnsureRootOrHalfTechnicalCollective = EnsureOneOf<
-    AccountId,
-    EnsureRoot<AccountId>,
-    pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, TechnicalCollective>,
->;
+// pub type EnsureRootOrHalfTechnicalCollective = EnsureOneOf<
+//     AccountId,
+//     EnsureRoot<AccountId>,
+//     pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, TechnicalCollective>,
+// >;
 
 impl pallet_ocw::aura_handler::Config for Runtime {}
 
@@ -44,7 +44,7 @@ impl pallet_ocw::Config for Runtime {
     type FractionLengthNum = FractionLengthNum;
     type CalculationKind = CalculationKind;
     // type RequestOrigin = pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, TechnicalCollective> ; // frame_system::EnsureRoot<AccountId>;
-    type RequestOrigin = EnsureRootOrHalfTechnicalCollective ;
+    type RequestOrigin = EnsureRoot<AccountId>; // EnsureRootOrHalfTechnicalCollective ;
     // type RequestOrigin = frame_system::EnsureRoot<AccountId>;
     type ValidatorAuthority = <Self as frame_system::Config>::AccountId;
     // type VMember = StakingExtend;

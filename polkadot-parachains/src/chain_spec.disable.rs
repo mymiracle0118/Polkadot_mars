@@ -24,14 +24,7 @@ use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 use rococo_parachain_runtime::{
-	CouncilConfig,
-	TechnicalCommitteeConfig,
-	DemocracyConfig,
-	InflationInfo,
-	Balance,
-	Range,
-	// // ParachainStakingConfig,
-	OCWModuleConfig,
+	CouncilConfig,TechnicalCommitteeConfig,DemocracyConfig,InflationInfo,Balance,Range,ParachainStakingConfig,OCWModuleConfig,
 };
 
 use sp_runtime::Perbill;
@@ -46,9 +39,6 @@ pub type ChainSpec = sc_service::GenericChainSpec<rococo_parachain_runtime::Gene
 
 /// Specialized `ChainSpec` for the shell parachain runtime.
 pub type ShellChainSpec = sc_service::GenericChainSpec<shell_runtime::GenesisConfig, Extensions>;
-
-pub const PARA_ID_OF_MARS: ParaId = ParaId::new(2008);
-pub const PARA_ID_OF_ODYSSEY: ParaId = ParaId::new(2028);
 
 /// Helper function to generate a crypto pair from seed
 pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -120,10 +110,6 @@ pub fn get_chain_spec(id: ParaId) -> ChainSpec {
 						get_collator_keys_from_seed("Bob"),
 					),
 				],
-				// vec![
-				// 	get_from_seed::<AuraId>("Alice"),
-				// 	get_from_seed::<AuraId>("Bob"),
-				// ],
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_account_id_from_seed::<sr25519::Public>("Bob"),
@@ -173,37 +159,50 @@ pub fn get_shell_chain_spec(id: ParaId) -> ShellChainSpec {
 	)
 }
 
-pub fn mars_test_net(id: ParaId) -> ChainSpec {
+pub fn staging_test_net(id: ParaId) -> ChainSpec {
 	ChainSpec::from_genesis(
-		"Ares Pc1",
+		"Mars Testnet",
 		"mars_testnet",
 		ChainType::Live,
 		move || {
 			testnet_genesis(
+				vec![(
+					hex!["a4cbc9391b20d6dd89d1667165c355a524120fd10fe056ba80bb63f3057a0f73"].into(),
+					hex!["3caff95b42c408e7f0096ed4aaedb5524940c8c1a62f46c6289f34e7e5fb1166"].unchecked_into(),
+					1000 * constants::currency::AMAS_UNITS,
+				),
+				(
+					hex!["78b90fe626734aef1a03426a1ebeaf1a98d747d00c8ef250bf1e70b8bf87ab62"].into(),
+					hex!["86989f896cff3671e0fe36578712d555c9f4b71fe94c9d9516a0313cc789b505"].unchecked_into(),
+					1000 * constants::currency::AMAS_UNITS, //1000
+				),
+			],
 				vec![],
-				vec![],
-				hex!["aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019"].into(),
+				hex!["a4cbc9391b20d6dd89d1667165c355a524120fd10fe056ba80bb63f3057a0f73"].into(),
 				vec![
 					(
-						hex!("aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019").into(),
-						hex!("aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019").unchecked_into(),
+						hex!["a4cbc9391b20d6dd89d1667165c355a524120fd10fe056ba80bb63f3057a0f73"].into(), //1//collator
+						get_collator_keys_from_seed("blur pioneer frown science banana impose avoid law act strategy have bronze//1//candidate"),
 					),
 					(
-						hex!("74a173a22757ddc9790ed388953a1ed8a5933a421858533411b36ebd41d74165").into(),
-						hex!("74a173a22757ddc9790ed388953a1ed8a5933a421858533411b36ebd41d74165").unchecked_into(),
-					)
+						hex!["78b90fe626734aef1a03426a1ebeaf1a98d747d00c8ef250bf1e70b8bf87ab62"].into(), //2//collator
+						get_collator_keys_from_seed("blur pioneer frown science banana impose avoid law act strategy have bronze//2//candidate"),
+					),
 				],
+				// vec![
+				// 	// $secret//one
+				// 	hex!["aad9fa2249f87a210a0f93400b7f90e47b810c6d65caa0ca3f5af982904c2a33"]
+				// 		.unchecked_into(),
+				// 	// $secret//two
+				// 	hex!["d47753f0cca9dd8da00c70e82ec4fc5501a69c49a5952a643d18802837c88212"]
+				// 		.unchecked_into(),
+				// ],
 				vec![
-					hex!["70214e02fb2ec155a4c7bb8c122864b3b03f58c4ac59e8d83af7dc29851df657"].into(),
-					hex!["aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019"].into(),
-					hex!["c82c3780d981812be804345618d27228680f61bb06a22689dcacf32b9be8815a"].into(),
-					hex!["74a173a22757ddc9790ed388953a1ed8a5933a421858533411b36ebd41d74165"].into(),
-					hex!["acad76a1f273ab3b8e453d630d347668f1cfa9b01605800dab7126a494c04c7c"].into(),
-					hex!["9e55f821f7b3484f15942af308001c32f113f31444f420a77422702907510669"].into(),
-					hex!["4aa6e0eeed2e3d1f35a8eb1cd650451327ad378fb8975dbf5747016ff3be2460"].into(),
-					hex!["587bae319ecaee13ce2dbdedfc6d66eb189e5af427666b21b4d4a08c7af0671c"].into(),
+					hex!["a4cbc9391b20d6dd89d1667165c355a524120fd10fe056ba80bb63f3057a0f73"].into(),
+					hex!["78b90fe626734aef1a03426a1ebeaf1a98d747d00c8ef250bf1e70b8bf87ab62"].into(),
+					hex!["26f58381475d9b159a09864132ec0c5250cf985e2ed68c541446c4f2524e4d36"].into(),
 				],
-				PARA_ID_OF_MARS,
+				id,
 			)
 		},
 		Vec::new(),
@@ -216,66 +215,7 @@ pub fn mars_test_net(id: ParaId) -> ChainSpec {
 		),
 		Extensions {
 			relay_chain: "kusama".into(),
-			para_id: PARA_ID_OF_MARS.into(),
-		},
-	)
-}
-
-pub fn odyssey_test_net(id: ParaId) -> ChainSpec {
-	ChainSpec::from_genesis(
-		"Ares Odyssey",
-		"ares_odyssey",
-		ChainType::Live,
-		move || {
-			testnet_genesis(
-				vec![
-					// (
-					// 	 hex!["a4cbc9391b20d6dd89d1667165c355a524120fd10fe056ba80bb63f3057a0f73"].into(),
-					// 	 hex!["3caff95b42c408e7f0096ed4aaedb5524940c8c1a62f46c6289f34e7e5fb1166"].unchecked_into(),
-					// 	 1000 * constants::currency::AMAS_UNITS,
-					//  ),
-					//  (
-					// 	 hex!["78b90fe626734aef1a03426a1ebeaf1a98d747d00c8ef250bf1e70b8bf87ab62"].into(),
-					// 	 hex!["86989f896cff3671e0fe36578712d555c9f4b71fe94c9d9516a0313cc789b505"].unchecked_into(),
-					// 	 1000 * constants::currency::AMAS_UNITS, //1000
-					//  ),
-				],
-				vec![],
-				hex!["aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019"].into(),
-				vec![
-					(
-						hex!("aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019").into(),
-						hex!("aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019").unchecked_into(),
-					),
-					(
-						hex!("74a173a22757ddc9790ed388953a1ed8a5933a421858533411b36ebd41d74165").into(),
-						hex!("74a173a22757ddc9790ed388953a1ed8a5933a421858533411b36ebd41d74165").unchecked_into(),
-					)
-				],
-				vec![
-					hex!["70214e02fb2ec155a4c7bb8c122864b3b03f58c4ac59e8d83af7dc29851df657"].into(),
-					hex!["aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019"].into(),
-					hex!["c82c3780d981812be804345618d27228680f61bb06a22689dcacf32b9be8815a"].into(),
-					hex!["74a173a22757ddc9790ed388953a1ed8a5933a421858533411b36ebd41d74165"].into(),
-					hex!["acad76a1f273ab3b8e453d630d347668f1cfa9b01605800dab7126a494c04c7c"].into(),
-					hex!["9e55f821f7b3484f15942af308001c32f113f31444f420a77422702907510669"].into(),
-					hex!["4aa6e0eeed2e3d1f35a8eb1cd650451327ad378fb8975dbf5747016ff3be2460"].into(),
-					hex!["587bae319ecaee13ce2dbdedfc6d66eb189e5af427666b21b4d4a08c7af0671c"].into(),
-				],
-				PARA_ID_OF_ODYSSEY,
-			)
-		},
-		Vec::new(),
-		None,
-		None,
-		Some(
-			serde_json::from_str(
-				"{\"tokenDecimals\": 12, \"tokenSymbol\": \"ARES\", \"SS58Prefix\": 34}",
-			).expect("Provided valid json map"),
-		),
-		Extensions {
-			relay_chain: "polkadot".into(),
-			para_id: PARA_ID_OF_ODYSSEY.into(),
+			para_id: id.into(),
 		},
 	)
 }
@@ -310,9 +250,6 @@ fn testnet_genesis(
 	endowed_accounts: Vec<AccountId>,
 	id: ParaId,
 ) -> rococo_parachain_runtime::GenesisConfig {
-	const TOTAL_ISSUANCE: Balance = constants::currency::AMAS_UNITS * 1_000_000_000; // one billion
-	let endowment: Balance = TOTAL_ISSUANCE / endowed_accounts.len() as u128;
-
 	rococo_parachain_runtime::GenesisConfig {
 		system: rococo_parachain_runtime::SystemConfig {
 			code: rococo_parachain_runtime::WASM_BINARY
@@ -324,14 +261,17 @@ fn testnet_genesis(
 			balances: endowed_accounts
 				.iter()
 				.cloned()
-				.map(|k| (k, endowment))
+				.map(|k| (k, 1 << 60)) // 1.1529215046068e+18
 				.collect(),
 		},
 		sudo: rococo_parachain_runtime::SudoConfig { key: root_key.clone() },
 		parachain_info: rococo_parachain_runtime::ParachainInfoConfig { parachain_id: id },
+		// aura: rococo_parachain_runtime::AuraConfig {
+		// 	authorities: initial_authorities.clone(),
+		// },
 		collator_selection: rococo_parachain_runtime::CollatorSelectionConfig {
 			invulnerables: invulnerables.iter().cloned().map(|(acc, _)| acc).collect(),
-			candidacy_bond: AMAS_ED,
+			candidacy_bond: AMAS_ED * 16,
 			..Default::default()
 		},
 		session: rococo_parachain_runtime::SessionConfig {
@@ -342,10 +282,11 @@ fn testnet_genesis(
 					(
 						acc.clone(),                  // account id
 						acc.clone(),                  // validator id
-						rococo_parachain_session_keys(aura), // session keys
+						rococo_parachain_runtime::SessionKeys { aura }, // session keys
 					)
 				})
 				.collect(),
+
 		},
 		democracy: DemocracyConfig::default(),
 		council: CouncilConfig::default(),
@@ -362,15 +303,15 @@ fn testnet_genesis(
 		aura_ext: Default::default(),
 		parachain_system: Default::default(),
 		vesting: rococo_parachain_runtime::VestingConfig { vesting: vec![] },
-		// parachain_staking: ParachainStakingConfig {
-		// 	candidates: candidates
-		// 		.iter()
-		// 		.cloned()
-		// 		.map(|(account, _, bond)| (account, bond))
-		// 		.collect(),
-		// 	nominations,
-		// 	inflation_config: ares_inflation_config(),
-		// },
+		parachain_staking: ParachainStakingConfig {
+			candidates: candidates
+				.iter()
+				.cloned()
+				.map(|(account, _, bond)| (account, bond))
+				.collect(),
+			nominations,
+			inflation_config: ares_inflation_config(),
+		},
 		ocw_module: OCWModuleConfig {
 			_phantom: Default::default(),
 			request_base: Vec::new(),
@@ -488,8 +429,7 @@ pub type WestmintChainSpec = sc_service::GenericChainSpec<westmint_runtime::Gene
 const STATEMINT_ED: StatemintBalance = statemint_runtime::constants::currency::EXISTENTIAL_DEPOSIT;
 const STATEMINE_ED: StatemintBalance = statemine_runtime::constants::currency::EXISTENTIAL_DEPOSIT;
 const WESTMINT_ED: StatemintBalance = westmint_runtime::constants::currency::EXISTENTIAL_DEPOSIT;
-const AMAS_ED: rococo_parachain_runtime::constants::currency::CurrencyBalance =
-	rococo_parachain_runtime::constants::currency::EXISTENTIAL_DEPOSIT;
+const AMAS_ED: StatemintBalance =  rococo_parachain_runtime::constants::currency::EXISTENTIAL_DEPOSIT;
 
 /// Helper function to generate a crypto pair from seed
 pub fn get_pair_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -517,11 +457,6 @@ pub fn statemint_session_keys(keys: AuraId) -> statemint_runtime::opaque::Sessio
 /// The input must be a tuple of individual keys (a single arg for now since we have just one key).
 pub fn statemine_session_keys(keys: AuraId) -> statemine_runtime::opaque::SessionKeys {
 	statemine_runtime::opaque::SessionKeys { aura: keys }
-}
-
-// rococo_parachain_runtime
-pub fn rococo_parachain_session_keys(keys: AuraId) -> rococo_parachain_runtime::opaque::SessionKeys {
-	rococo_parachain_runtime::opaque::SessionKeys { aura: keys }
 }
 
 /// Generate the session keys from individual elements.
@@ -662,47 +597,6 @@ fn statemint_genesis(
 	}
 }
 
-// pub fn statemine_development_config(id: ParaId) -> StatemineChainSpec {
-// 	let mut properties = sc_chain_spec::Properties::new();
-// 	properties.insert("tokenSymbol".into(), "KSM".into());
-// 	properties.insert("tokenDecimals".into(), 12.into());
-//
-// 	StatemineChainSpec::from_genesis(
-// 		// Name
-// 		"Statemine Development",
-// 		// ID
-// 		"statemine_dev",
-// 		ChainType::Local,
-// 		move || {
-// 			statemine_genesis(
-// 				// initial collators.
-// 				vec![
-// 					(
-// 						get_account_id_from_seed::<sr25519::Public>("Alice"),
-// 						get_collator_keys_from_seed("Alice"),
-// 					)
-// 				],
-// 				vec![
-// 					get_account_id_from_seed::<sr25519::Public>("Alice"),
-// 					get_account_id_from_seed::<sr25519::Public>("Bob"),
-// 					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
-// 					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
-// 				],
-// 				id,
-// 			)
-// 		},
-// 		vec![],
-// 		None,
-// 		None,
-// 		Some(properties),
-// 		Extensions {
-// 			relay_chain: "kusama-dev".into(),
-// 			para_id: id.into(),
-// 		},
-// 	)
-// }
-
-
 pub fn statemine_development_config(id: ParaId) -> StatemineChainSpec {
 	let mut properties = sc_chain_spec::Properties::new();
 	properties.insert("tokenSymbol".into(), "KSM".into());
@@ -719,15 +613,15 @@ pub fn statemine_development_config(id: ParaId) -> StatemineChainSpec {
 				// initial collators.
 				vec![
 					(
-						hex!("aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019").into(),
-						hex!("aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019").unchecked_into(),
+						get_account_id_from_seed::<sr25519::Public>("Alice"),
+						get_collator_keys_from_seed("Alice"),
 					)
 				],
 				vec![
-					hex!("aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019").into(),
-					hex!("70214e02fb2ec155a4c7bb8c122864b3b03f58c4ac59e8d83af7dc29851df657").into(),
-					hex!("c82c3780d981812be804345618d27228680f61bb06a22689dcacf32b9be8815a").into(),
-					hex!("74a173a22757ddc9790ed388953a1ed8a5933a421858533411b36ebd41d74165").into(),
+					get_account_id_from_seed::<sr25519::Public>("Alice"),
+					get_account_id_from_seed::<sr25519::Public>("Bob"),
+					get_account_id_from_seed::<sr25519::Public>("Alice//stash"),
+					get_account_id_from_seed::<sr25519::Public>("Bob//stash"),
 				],
 				id,
 			)

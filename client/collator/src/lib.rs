@@ -188,11 +188,7 @@ where
 		relay_parent: PHash,
 		validation_data: PersistedValidationData,
 	) -> Option<CollationResult> {
-		tracing::trace!(
-			target: LOG_TARGET,
-			relay_parent = ?relay_parent,
-			"Producing candidate",
-		);
+
 
 		let last_head = match Block::Header::decode(&mut &validation_data.parent_head.0[..]) {
 			Ok(x) => x,
@@ -235,6 +231,7 @@ where
 				return None;
 			}
 		};
+
 
 		// Create the parachain block data for the validators.
 		let b = ParachainBlockData::<Block>::new(header, extrinsics, compact_proof);
@@ -325,8 +322,7 @@ pub async fn start_collator<Block, RA, BS, Spawner>(
 		.send_msg(
 			CollationGenerationMessage::Initialize(config),
 			"StartCollator",
-		)
-		.await;
+		).await;
 
 	overseer_handle
 		.send_msg(CollatorProtocolMessage::CollateOn(para_id), "StartCollator")

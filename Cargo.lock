@@ -1499,6 +1499,7 @@ dependencies = [
  "cumulus-test-client",
  "cumulus-test-runtime",
  "futures 0.3.16",
+ "log",
  "parity-scale-codec",
  "parking_lot 0.10.2",
  "polkadot-node-primitives",
@@ -1528,6 +1529,7 @@ dependencies = [
  "cumulus-client-consensus-common",
  "cumulus-primitives-core",
  "futures 0.3.16",
+ "log",
  "parity-scale-codec",
  "parking_lot 0.10.2",
  "polkadot-client",
@@ -1562,6 +1564,7 @@ dependencies = [
  "dyn-clone",
  "futures 0.3.16",
  "futures-timer 3.0.2",
+ "log",
  "parity-scale-codec",
  "polkadot-primitives",
  "polkadot-runtime",
@@ -1593,6 +1596,7 @@ dependencies = [
  "cumulus-client-consensus-common",
  "cumulus-primitives-core",
  "futures 0.3.16",
+ "log",
  "parity-scale-codec",
  "parking_lot 0.10.2",
  "polkadot-client",
@@ -1680,6 +1684,7 @@ dependencies = [
  "cumulus-client-consensus-common",
  "cumulus-client-pov-recovery",
  "cumulus-primitives-core",
+ "log",
  "parity-scale-codec",
  "parking_lot 0.10.2",
  "polkadot-overseer",
@@ -1708,6 +1713,7 @@ dependencies = [
  "frame-executive",
  "frame-support",
  "frame-system",
+ "log",
  "pallet-aura",
  "parity-scale-codec",
  "serde",
@@ -2054,6 +2060,7 @@ dependencies = [
  "frame-system",
  "futures 0.3.16",
  "jsonrpc-core",
+ "log",
  "pallet-transaction-payment",
  "parity-scale-codec",
  "polkadot-overseer",
@@ -4790,7 +4797,6 @@ checksum = "60302e4db3a61da70c0cb7991976248362f30319e88850c487b9b95bbf059e00"
 [[package]]
 name = "member-extend"
 version = "3.0.3"
-source = "git+https://github.com/aresprotocols/ocw-suit.git?branch=monthly-2021-09+1#18297c7c61dac6392c6e1bbfd40fc9c18220da96"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -4800,11 +4806,13 @@ dependencies = [
  "pallet-authorship",
  "pallet-session",
  "parity-scale-codec",
+ "scale-info 1.0.0",
  "serde",
  "serde_json",
  "sp-application-crypto",
  "sp-core",
  "sp-io",
+ "sp-keystore",
  "sp-runtime",
  "sp-std",
 ]
@@ -5289,7 +5297,6 @@ dependencies = [
 [[package]]
 name = "ocw-finance"
 version = "3.0.4"
-source = "git+https://github.com/aresprotocols/ocw-suit.git?branch=monthly-2021-09+1#18297c7c61dac6392c6e1bbfd40fc9c18220da96"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -5297,6 +5304,7 @@ dependencies = [
  "hex",
  "pallet-balances",
  "parity-scale-codec",
+ "scale-info 1.0.0",
  "sp-application-crypto",
  "sp-core",
  "sp-io",
@@ -5454,7 +5462,7 @@ dependencies = [
  "frame-system",
  "pallet-session",
  "parity-scale-codec",
- "scale-info",
+ "scale-info 0.10.0",
  "serde",
  "sp-runtime",
  "sp-std",
@@ -5477,7 +5485,7 @@ dependencies = [
  "pallet-mmr-primitives",
  "pallet-session",
  "parity-scale-codec",
- "scale-info",
+ "scale-info 0.10.0",
  "serde",
  "sp-core",
  "sp-io",
@@ -5833,7 +5841,6 @@ dependencies = [
 [[package]]
 name = "pallet-ocw"
 version = "3.2.8"
-source = "git+https://github.com/aresprotocols/ocw-suit.git?branch=monthly-2021-09+1#18297c7c61dac6392c6e1bbfd40fc9c18220da96"
 dependencies = [
  "frame-support",
  "frame-system",
@@ -5845,6 +5852,7 @@ dependencies = [
  "pallet-balances",
  "pallet-session",
  "parity-scale-codec",
+ "scale-info 1.0.0",
  "serde",
  "serde_json",
  "sp-application-crypto",
@@ -10067,7 +10075,20 @@ dependencies = [
  "cfg-if 1.0.0",
  "derive_more 0.99.14",
  "parity-scale-codec",
- "scale-info-derive",
+ "scale-info-derive 0.7.0",
+]
+
+[[package]]
+name = "scale-info"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c55b744399c25532d63a0d2789b109df8d46fc93752d46b0782991a931a782f"
+dependencies = [
+ "bitvec",
+ "cfg-if 1.0.0",
+ "derive_more 0.99.14",
+ "parity-scale-codec",
+ "scale-info-derive 1.0.0",
 ]
 
 [[package]]
@@ -10075,6 +10096,18 @@ name = "scale-info-derive"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b648fa291891a4c80187a25532f6a7d96b82c70353e30b868b14632b8fe043d6"
+dependencies = [
+ "proc-macro-crate 1.0.0",
+ "proc-macro2 1.0.28",
+ "quote 1.0.9",
+ "syn 1.0.73",
+]
+
+[[package]]
+name = "scale-info-derive"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "baeb2780690380592f86205aa4ee49815feb2acad8c2f59e6dd207148c3f1fcd"
 dependencies = [
  "proc-macro-crate 1.0.0",
  "proc-macro2 1.0.28",

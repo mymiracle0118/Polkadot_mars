@@ -110,8 +110,14 @@ fn load_spec(
 		"westmint" => Box::new(chain_spec::ChainSpec::from_json_bytes(
 			&include_bytes!("../res/westmint.json")[..],
 		)?),
-		"mars" => Box::new(chain_spec::mars_test_net(para_id)),
-		"odyssey" => Box::new(chain_spec::odyssey_test_net(para_id)),
+		"mars" => Box::new(chain_spec::ChainSpec::from_json_bytes(
+			&include_bytes!("../res/ares-protocol-mars2008.json")[..],
+		)?),
+		"mars-dev" => Box::new(chain_spec::mars_test_net(para_id)),
+		"odyssey" => Box::new(chain_spec::ChainSpec::from_json_bytes(
+			&include_bytes!("../res/ares-protocol-odyssey2028.json")[..],
+		)?),
+		"odyssey-dev" => Box::new(chain_spec::odyssey_test_net(para_id)),
 		"" => Box::new(chain_spec::get_chain_spec(para_id)),
 		// "" => Box::new(chain_spec::staging_test_net(para_id)),
 		path => {
@@ -133,7 +139,7 @@ fn load_spec(
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
-		"Ares collator".into()
+		"Mars collator".into()
 	}
 
 	fn impl_version() -> String {
@@ -434,6 +440,7 @@ pub fn run() -> Result<()> {
 				info!("Parachain id: {:?}", id);
 				info!("Parachain Account: {}", parachain_account);
 				info!("Parachain genesis state: {}", genesis_state);
+				info!("LIN-DEBUG::Realchain role {} ", polkadot_config.role.to_string());
 				info!(
 					"Is collating: {}",
 					if config.role.is_authority() {
@@ -442,8 +449,6 @@ pub fn run() -> Result<()> {
 						"no"
 					}
 				);
-
-
 
 				if config.chain_spec.is_statemint() {
 					crate::service::start_statemint_node::<statemint_runtime::RuntimeApi, StatemintRuntimeExecutor>(

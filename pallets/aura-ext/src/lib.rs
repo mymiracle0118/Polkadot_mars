@@ -92,7 +92,6 @@ pub mod pallet {
 	impl<T: Config> GenesisBuild<T> for GenesisConfig {
 		fn build(&self) {
 			let authorities = Aura::<T>::authorities();
-
 			assert!(
 				!authorities.is_empty(),
 				"AuRa authorities empty, maybe wrong order in `construct_runtime!`?",

@@ -233,7 +233,6 @@ where
 		);
 
 		let res = self.aura_worker.lock().await.on_slot(info).await?;
-
 		Some(ParachainCandidate {
 			block: res.block,
 			proof: res.storage_proof,

@@ -64,10 +64,11 @@ native_executor_instance!(
 	rococo_parachain_runtime::native_version,
 );
 
-use rococo_parachain_runtime::{
-	part_ocw::LOCAL_STORAGE_PRICE_REQUEST_DOMAIN
-};
+// use rococo_parachain_runtime::{
+// 	part_ocw::LOCAL_STORAGE_PRICE_REQUEST_DOMAIN
+// };
 // use parity_scale_codec::Encode;
+const LOCAL_STORAGE_PRICE_REQUEST_DOMAIN: &[u8] = b"are-ocw::price_request_domain";
 
 // Native executor instance.
 native_executor_instance!(
@@ -353,7 +354,6 @@ where
 			parachain_consensus,
 			import_queue,
 		};
-
 		start_collator(params).await?;
 	} else {
 		let params = StartFullNodeParams {
@@ -363,7 +363,6 @@ where
 			para_id: id,
 			relay_chain_full_node,
 		};
-
 		start_full_node(params)?;
 	}
 
@@ -429,6 +428,7 @@ pub async fn start_rococo_parachain_node(
 	TaskManager,
 	Arc<TFullClient<Block, rococo_parachain_runtime::RuntimeApi, RococoParachainRuntimeExecutor>>,
 )> {
+	// start_node_impl()
 	start_node_impl::<rococo_parachain_runtime::RuntimeApi, RococoParachainRuntimeExecutor, _, _, _>(
 		parachain_config,
 		polkadot_config,

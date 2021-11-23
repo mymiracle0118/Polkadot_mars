@@ -61,13 +61,13 @@ pallet-authorship = { default-features = false, git = "https://github.com/parity
 pallet-session = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.9"  }
 pallet-collator-selection = { path = "../../pallets/collator-selection", default-features = false }
 
-#pallet-ocw = { default-features = false,  package = "pallet-ocw", path= "../../../ocw-suit/pallets/pallet-ocw", version = "3.2.8"}
-#ocw-finance = { default-features = false,  package = "ocw-finance", path= "../../../ocw-suit/pallets/ocw-finance", version = "3.0.4" }
-#member-extend = {default-features = false, path = '../../../ocw-suit/pallets/member-extend',  version = '3.0.3'}
+pallet-ocw = { default-features = false,  package = "pallet-ocw", path= "../../../ocw-suit/pallets/pallet-ocw", version = "3.2.8"}
+ocw-finance = { default-features = false,  package = "ocw-finance", path= "../../../ocw-suit/pallets/ocw-finance", version = "3.0.4" }
+member-extend = {default-features = false, path = '../../../ocw-suit/pallets/member-extend',  version = '3.0.3'}
 
-pallet-ocw = {default-features = false, git = 'https://github.com/aresprotocols/ocw-suit.git', branch = 'monthly-2021-09+1', version = '3.2.8'}
-ocw-finance = {default-features = false, git = 'https://github.com/aresprotocols/ocw-suit.git', branch = 'monthly-2021-09+1', version = '3.0.4'}
-member-extend = {default-features = false, git = 'https://github.com/aresprotocols/ocw-suit.git', branch = 'monthly-2021-09+1', version = '3.0.3'}
+#pallet-ocw = {default-features = false, git = 'https://github.com/aresprotocols/ocw-suit.git', branch = 'monthly-2021-09+1', version = '3.2.8'}
+#ocw-finance = {default-features = false, git = 'https://github.com/aresprotocols/ocw-suit.git', branch = 'monthly-2021-09+1', version = '3.0.4'}
+#member-extend = {default-features = false, git = 'https://github.com/aresprotocols/ocw-suit.git', branch = 'monthly-2021-09+1', version = '3.0.3'}
 
 # Governance
 pallet-democracy = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.9"  }
@@ -133,6 +133,7 @@ std = [
 	"pallet-collator-selection/std",
 	"pallet-authorship/std",
 	"pallet-session/std",
+	"member-extend/std",
 	"pallet-ocw/std",
 	"ocw-finance/std",
 
