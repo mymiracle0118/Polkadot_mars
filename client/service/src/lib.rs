@@ -122,7 +122,6 @@ where
 		.client
 		.execute_with(StartPoVRecovery {
 			para_id,
-			// LinDebug:: client is para chain.
 			client: client.clone(),
 			import_queue,
 			task_manager,
@@ -234,7 +233,6 @@ where
 		PClient: AbstractClient<PBlock, PBackend, Api = Api> + 'static,
 	{
 
-		log::info!("**** LINDEBUG:: StartConsensus::execute_with_client");
 		let consensus = cumulus_client_consensus_common::run_parachain_consensus(
 			self.para_id,
 			self.client.clone(),
@@ -279,7 +277,6 @@ where
 		Api: RuntimeApiCollection<StateBackend = PBackend::State>,
 		PClient: AbstractClient<PBlock, PBackend, Api = Api> + 'static,
 	{
-		log::info!("**** LINDEBUG:: StartPoVRecovery::execute_with_client");
 		let pov_recovery = cumulus_client_pov_recovery::PoVRecovery::new(
 			self.overseer_handle,
 			sc_consensus_babe::Config::get_or_compute(&*client)?.slot_duration(),

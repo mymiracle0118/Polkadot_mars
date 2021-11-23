@@ -4,7 +4,7 @@ pub mod currency {
 	pub type CurrencyBalance = u128;
 
 	/// The existential deposit. Set to 1/10 of its parent Relay Chain.
-	pub const EXISTENTIAL_DEPOSIT: CurrencyBalance = 100 * AMAS_MILLICENTS;
+	pub const EXISTENTIAL_DEPOSIT: CurrencyBalance = 10000 * AMAS_UNITS;
 
 	pub const AMAS_UNITS: CurrencyBalance = 1_000_000_000_000; // 1  DOLLARS
 	pub const AMAS_CENTS: CurrencyBalance = AMAS_UNITS / 100; // 0.01  CENTS

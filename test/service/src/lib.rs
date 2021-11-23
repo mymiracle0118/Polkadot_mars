@@ -71,7 +71,6 @@ impl ParachainConsensus<Block> for NullConsensus {
 		_: PHash,
 		_: &PersistedValidationData,
 	) -> Option<ParachainCandidate<Block>> {
-		log::info!("*** LINDEBUG:: start_collator B2.5 ");
 		None
 	}
 }

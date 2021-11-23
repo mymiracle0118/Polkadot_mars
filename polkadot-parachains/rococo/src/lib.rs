@@ -95,7 +95,7 @@ mod part_vesting;
 
 mod part_ocw_finance;
 mod part_member_extend;
-// pub mod part_ocw;
+pub mod part_ocw;
 
 pub type SessionHandlers = ();
 
@@ -128,8 +128,8 @@ pub mod opaque {
 /// This runtime version.
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("mars"),
-	impl_name: create_runtime_str!("mars"),
+	spec_name: create_runtime_str!("ares-protocol"),
+	impl_name: create_runtime_str!("ares-protocol"),
 	authoring_version: 1,
 	spec_version: 14,
 	impl_version: 0,
@@ -594,7 +594,7 @@ construct_runtime! {
 		//
 		MemberExtend: member_extend::{Pallet},
 		OcwFinance: ocw_finance::{Pallet, Call, Storage, Event<T>},
-		// OCWModule: pallet_ocw::{Pallet, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
+		OCWModule: pallet_ocw::{Pallet, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
 
 		// XCM helpers.
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 50,

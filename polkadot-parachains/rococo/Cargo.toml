@@ -133,6 +133,7 @@ std = [
 	"pallet-collator-selection/std",
 	"pallet-authorship/std",
 	"pallet-session/std",
+	"member-extend/std",
 	"pallet-ocw/std",
 	"ocw-finance/std",
 

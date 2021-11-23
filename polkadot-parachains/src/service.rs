@@ -328,7 +328,6 @@ where
 		Arc::new(move |hash, data| network.announce_block(hash, data))
 	};
 
-	log::info!("***** LINDEBUG:: start_node_impl if validator = {}", &validator);
 	if validator {
 		let parachain_consensus = build_consensus(
 			client.clone(),
@@ -355,7 +354,6 @@ where
 			parachain_consensus,
 			import_queue,
 		};
-		log::info!("***** LINDEBUG:: start_node_impl ->start_collator()");
 		start_collator(params).await?;
 	} else {
 		let params = StartFullNodeParams {
@@ -365,7 +363,6 @@ where
 			para_id: id,
 			relay_chain_full_node,
 		};
-		log::info!("***** LINDEBUG:: start_node_impl ->start_full_node()");
 		start_full_node(params)?;
 	}
 
@@ -449,8 +446,6 @@ pub async fn start_rococo_parachain_node(
 		 force_authoring| {
 			let slot_duration = cumulus_client_consensus_aura::slot_duration(&*client)?;
 
-			// LINDEBUG TODO
-			log::info!("### LINDEBUG:: build_consensus U1 ",);
 			let proposer_factory = sc_basic_authorship::ProposerFactory::with_proof_recording(
 				task_manager.spawn_handle(),
 				client.clone(),
@@ -458,8 +453,6 @@ pub async fn start_rococo_parachain_node(
 				prometheus_registry.clone(),
 				telemetry.clone(),
 			);
-
-			log::info!("### LINDEBUG:: build_consensus U2 ",);
 
 			let relay_chain_backend = relay_chain_node.backend.clone();
 			let relay_chain_client = relay_chain_node.client.clone();
@@ -698,7 +691,6 @@ where
 		relay_parent: PHash,
 		validation_data: &PersistedValidationData,
 	) -> Option<ParachainCandidate<Block>> {
-		log::info!("*** LINDEBUG:: start_collator B2.6 ");
 		let block_id = BlockId::hash(parent.hash());
 		if self
 			.client

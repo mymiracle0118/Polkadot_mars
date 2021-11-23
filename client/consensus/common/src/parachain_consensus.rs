@@ -140,7 +140,6 @@ pub async fn run_parachain_consensus<P, R, Block, B>(
 	R: RelaychainClient,
 	B: Backend<Block>,
 {
-	log::info!("*** LINDEBUG:: run_parachain_consensus, para_id = {:?}", para_id.clone());
 	let follow_new_best = follow_new_best(
 		para_id,
 		parachain.clone(),

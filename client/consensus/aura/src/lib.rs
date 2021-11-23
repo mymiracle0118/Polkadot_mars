@@ -215,13 +215,10 @@ where
 		relay_parent: PHash,
 		validation_data: &PersistedValidationData,
 	) -> Option<ParachainCandidate<B>> {
-		log::info!("*** LINDEBUG:: start_collator B2.1 ");
-		log::info!("*** LINDEBUG:: parent=`{:?}`, relay_parent=`{:?}`, validation_data={:?}", parent, &relay_parent, validation_data);
 		let (inherent_data, inherent_data_providers) = self
 			.inherent_data(parent.hash(), validation_data, relay_parent)
 			.await?;
 
-		log::info!("*** LINDEBUG:: start_collator B2.2 ");
 		let info = SlotInfo::new(
 			inherent_data_providers.slot(),
 			inherent_data_providers.timestamp(),
@@ -235,11 +232,7 @@ where
 			Some((validation_data.max_pov_size / 2) as usize),
 		);
 
-		log::info!("*** LINDEBUG:: start_collator B2.3 ");
 		let res = self.aura_worker.lock().await.on_slot(info).await?;
-
-		log::info!("*** LINDEBUG::  B2.4 res=`{:?}`", &res);
-
 		Some(ParachainCandidate {
 			block: res.block,
 			proof: res.storage_proof,

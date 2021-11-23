@@ -171,7 +171,6 @@ where
 		relay_parent: PHash,
 		validation_data: &PersistedValidationData,
 	) -> Option<ParachainCandidate<B>> {
-		log::info!("*** LINDEBUG:: start_collator B2.3 ");
 		let proposer_future = self.proposer_factory.lock().init(&parent);
 
 		let proposer = proposer_future

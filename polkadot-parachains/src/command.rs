@@ -110,8 +110,14 @@ fn load_spec(
 		"westmint" => Box::new(chain_spec::ChainSpec::from_json_bytes(
 			&include_bytes!("../res/westmint.json")[..],
 		)?),
-		"mars" => Box::new(chain_spec::mars_test_net(para_id)),
-		"odyssey" => Box::new(chain_spec::odyssey_test_net(para_id)),
+		"mars" => Box::new(chain_spec::ChainSpec::from_json_bytes(
+			&include_bytes!("../res/ares-protocol-mars2008.json")[..],
+		)?),
+		"mars-dev" => Box::new(chain_spec::mars_test_net(para_id)),
+		"odyssey" => Box::new(chain_spec::ChainSpec::from_json_bytes(
+			&include_bytes!("../res/ares-protocol-odyssey2028.json")[..],
+		)?),
+		"odyssey-dev" => Box::new(chain_spec::odyssey_test_net(para_id)),
 		"" => Box::new(chain_spec::get_chain_spec(para_id)),
 		// "" => Box::new(chain_spec::staging_test_net(para_id)),
 		path => {
