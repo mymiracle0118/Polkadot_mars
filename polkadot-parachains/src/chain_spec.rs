@@ -24,25 +24,40 @@ use sp_core::{crypto::UncheckedInto, sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 use rococo_parachain_runtime::{
-	CouncilConfig,
-	TechnicalCommitteeConfig,
-	DemocracyConfig,
-	InflationInfo,
+	// CouncilConfig,
+	// TechnicalCommitteeConfig,
+	// DemocracyConfig,
+	// InflationInfo,
 	Balance,
-	Range,
+	// Range,
 	// // ParachainStakingConfig,
-	OCWModuleConfig,
+	// OCWModuleConfig,
 };
+use rococo_parachain_runtime::constants;
 
 use sp_runtime::Perbill;
 use nimbus_primitives::NimbusId;
 
+use statemint_common::Balance as StatemintBalance;
+use sc_telemetry::serde_json;
 
-//pub mod rococo_parachain_runtime::constants;
-use rococo_parachain_runtime::constants;
+mod genesis_of_mars;
+mod genesis_of_odyssey;
+
+/// Specialized `ChainSpec` for the normal parachain runtime.
+pub type StatemintChainSpec = sc_service::GenericChainSpec<statemint_runtime::GenesisConfig, Extensions>;
+pub type StatemineChainSpec = sc_service::GenericChainSpec<statemine_runtime::GenesisConfig, Extensions>;
+pub type WestmintChainSpec = sc_service::GenericChainSpec<westmint_runtime::GenesisConfig, Extensions>;
+
+const STATEMINT_ED: StatemintBalance = statemint_runtime::constants::currency::EXISTENTIAL_DEPOSIT;
+const STATEMINE_ED: StatemintBalance = statemine_runtime::constants::currency::EXISTENTIAL_DEPOSIT;
+const WESTMINT_ED: StatemintBalance = westmint_runtime::constants::currency::EXISTENTIAL_DEPOSIT;
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<rococo_parachain_runtime::GenesisConfig, Extensions>;
+
+pub type MarsChainSpec = sc_service::GenericChainSpec<mars_runtime::GenesisConfig, Extensions>;
+pub type OdysseyChainSpec = sc_service::GenericChainSpec<odyssey_runtime::GenesisConfig, Extensions>;
 
 /// Specialized `ChainSpec` for the shell parachain runtime.
 pub type ShellChainSpec = sc_service::GenericChainSpec<shell_runtime::GenesisConfig, Extensions>;
@@ -173,13 +188,13 @@ pub fn get_shell_chain_spec(id: ParaId) -> ShellChainSpec {
 	)
 }
 
-pub fn mars_test_net(id: ParaId) -> ChainSpec {
-	ChainSpec::from_genesis(
-		"Ares Pc1",
-		"mars_testnet",
+pub fn mars_development_config(id: ParaId) -> MarsChainSpec {
+	MarsChainSpec::from_genesis(
+		"Ares Pc3",
+		"mars_testnet_2",
 		ChainType::Live,
 		move || {
-			testnet_genesis(
+			genesis_of_mars::mars_genesis(
 				vec![],
 				vec![],
 				hex!["aaf0c45982a423036601dcacc67854b38b854690d8e15bf1543e9a00e660e019"].into(),
@@ -221,13 +236,13 @@ pub fn mars_test_net(id: ParaId) -> ChainSpec {
 	)
 }
 
-pub fn odyssey_test_net(id: ParaId) -> ChainSpec {
-	ChainSpec::from_genesis(
+pub fn odyssey_development_config(id: ParaId) -> OdysseyChainSpec {
+	OdysseyChainSpec::from_genesis(
 		"Ares Odyssey",
 		"ares_odyssey",
 		ChainType::Live,
 		move || {
-			testnet_genesis(
+			genesis_of_odyssey::odyssey_genesis(
 				vec![
 					// (
 					// 	 hex!["a4cbc9391b20d6dd89d1667165c355a524120fd10fe056ba80bb63f3057a0f73"].into(),
@@ -280,26 +295,26 @@ pub fn odyssey_test_net(id: ParaId) -> ChainSpec {
 	)
 }
 
-pub fn ares_inflation_config() -> InflationInfo<Balance> {
-	InflationInfo {
-		expect: Range {
-			min: 100_000 * constants::currency::AMAS_UNITS,
-			ideal: 200_000 * constants::currency::AMAS_UNITS,
-			max: 500_000 * constants::currency::AMAS_UNITS,
-		},
-		annual: Range {
-			min: Perbill::from_percent(4),
-			ideal: Perbill::from_percent(5),
-			max: Perbill::from_percent(5),
-		},
-		// 8766 rounds (hours) in a year
-		round: Range {
-			min: Perbill::from_parts(Perbill::from_percent(4).deconstruct() / 8766),
-			ideal: Perbill::from_parts(Perbill::from_percent(5).deconstruct() / 8766),
-			max: Perbill::from_parts(Perbill::from_percent(5).deconstruct() / 8766),
-		},
-	}
-}
+// pub fn ares_inflation_config() -> InflationInfo<Balance> {
+// 	InflationInfo {
+// 		expect: Range {
+// 			min: 100_000 * constants::currency::AMAS_UNITS,
+// 			ideal: 200_000 * constants::currency::AMAS_UNITS,
+// 			max: 500_000 * constants::currency::AMAS_UNITS,
+// 		},
+// 		annual: Range {
+// 			min: Perbill::from_percent(4),
+// 			ideal: Perbill::from_percent(5),
+// 			max: Perbill::from_percent(5),
+// 		},
+// 		// 8766 rounds (hours) in a year
+// 		// round: Range {
+// 		// 	min: Perbill::from_parts(Perbill::from_percent(4).deconstruct() / 8766),
+// 		// 	ideal: Perbill::from_parts(Perbill::from_percent(5).deconstruct() / 8766),
+// 		// 	max: Perbill::from_parts(Perbill::from_percent(5).deconstruct() / 8766),
+// 		// },
+// 	}
+// }
 
 fn testnet_genesis(
 	candidates: Vec<(AccountId, NimbusId, Balance)>,
@@ -329,39 +344,39 @@ fn testnet_genesis(
 		},
 		sudo: rococo_parachain_runtime::SudoConfig { key: root_key.clone() },
 		parachain_info: rococo_parachain_runtime::ParachainInfoConfig { parachain_id: id },
-		collator_selection: rococo_parachain_runtime::CollatorSelectionConfig {
-			invulnerables: invulnerables.iter().cloned().map(|(acc, _)| acc).collect(),
-			candidacy_bond: AMAS_ED,
-			..Default::default()
-		},
-		session: rococo_parachain_runtime::SessionConfig {
-			keys: invulnerables
-				.iter()
-				.cloned()
-				.map(|(acc, aura)| {
-					(
-						acc.clone(),                  // account id
-						acc.clone(),                  // validator id
-						rococo_parachain_session_keys(aura), // session keys
-					)
-				})
-				.collect(),
-		},
-		democracy: DemocracyConfig::default(),
-		council: CouncilConfig::default(),
-		technical_committee: TechnicalCommitteeConfig {
-			members: endowed_accounts
-				.iter()
-				.take((endowed_accounts.len() + 1) / 2)
-				.cloned()
-				.collect(),
-			phantom: Default::default(),
-		},
-		treasury: Default::default(),
+		// collator_selection: rococo_parachain_runtime::CollatorSelectionConfig {
+		// 	invulnerables: invulnerables.iter().cloned().map(|(acc, _)| acc).collect(),
+		// 	candidacy_bond: AMAS_ED,
+		// 	..Default::default()
+		// },
+		// session: rococo_parachain_runtime::SessionConfig {
+		// 	keys: invulnerables
+		// 		.iter()
+		// 		.cloned()
+		// 		.map(|(acc, aura)| {
+		// 			(
+		// 				acc.clone(),                  // account id
+		// 				acc.clone(),                  // validator id
+		// 				rococo_parachain_session_keys(aura), // session keys
+		// 			)
+		// 		})
+		// 		.collect(),
+		// },
+		// democracy: DemocracyConfig::default(),
+		// council: CouncilConfig::default(),
+		// technical_committee: TechnicalCommitteeConfig {
+		// 	members: endowed_accounts
+		// 		.iter()
+		// 		.take((endowed_accounts.len() + 1) / 2)
+		// 		.cloned()
+		// 		.collect(),
+		// 	phantom: Default::default(),
+		// },
+		// treasury: Default::default(),
 		aura: Default::default(),
 		aura_ext: Default::default(),
 		parachain_system: Default::default(),
-		vesting: rococo_parachain_runtime::VestingConfig { vesting: vec![] },
+		// vesting: rococo_parachain_runtime::VestingConfig { vesting: vec![] },
 		// parachain_staking: ParachainStakingConfig {
 		// 	candidates: candidates
 		// 		.iter()
@@ -371,96 +386,96 @@ fn testnet_genesis(
 		// 	nominations,
 		// 	inflation_config: ares_inflation_config(),
 		// },
-		ocw_module: OCWModuleConfig {
-			_phantom: Default::default(),
-			request_base: Vec::new(),
-			price_pool_depth: 3u32,
-			price_allowable_offset: 10u8,
-			price_requests: vec![
-				// price_key, request_uri, parse_version, fraction_num, request interval
-				("btc-usdt".as_bytes().to_vec(), "btcusdt".as_bytes().to_vec(), 2u32, 4, 2),
-				("eth-usdt".as_bytes().to_vec(), "ethusdt".as_bytes().to_vec(), 2u32, 4, 2),
-				("dot-usdt".as_bytes().to_vec(), "dotusdt".as_bytes().to_vec(), 2u32, 4, 2),
-				("link-usdt".as_bytes().to_vec(), "linkusdt".as_bytes().to_vec(), 2u32, 4, 2),
-
-				("ada-usdt".as_bytes().to_vec(), "adausdt".as_bytes().to_vec(), 2u32, 4, 4),
-				("xrp-usdt".as_bytes().to_vec(), "xrpusdt".as_bytes().to_vec(), 2u32, 4, 4),
-				("sol-usdt".as_bytes().to_vec(), "solusdt".as_bytes().to_vec(), 2u32, 4, 4),
-				("uni-usdt".as_bytes().to_vec(), "uniusdt".as_bytes().to_vec(), 2u32, 4, 4),
-				("bnb-usdt".as_bytes().to_vec(), "bnbusdt".as_bytes().to_vec(), 2u32, 4, 4),
-				("1inch-usdt".as_bytes().to_vec(), "1INCHusdt".as_bytes().to_vec(), 2u32, 4, 4),
-				("atom-usdt".as_bytes().to_vec(), "atomusdt".as_bytes().to_vec(), 2u32, 4, 4),
-				("trx-usdt".as_bytes().to_vec(), "trxusdt".as_bytes().to_vec(), 2u32, 4, 4),
-				("aave-usdt".as_bytes().to_vec(), "aaveusdt".as_bytes().to_vec(), 2u32, 4, 4),
-				("snx-usdt".as_bytes().to_vec(), "snxusdt".as_bytes().to_vec(), 2u32, 4, 4),
-
-				("avax-usdt".as_bytes().to_vec(), "avaxusdt".as_bytes().to_vec(), 2u32, 4, 5),
-				("ltc-usdt".as_bytes().to_vec(), "ltcusdt".as_bytes().to_vec(), 2u32, 4, 5),
-				("bch-usdt".as_bytes().to_vec(), "bchusdt".as_bytes().to_vec(), 2u32, 4, 5),
-				("fil-usdt".as_bytes().to_vec(), "filusdt".as_bytes().to_vec(), 2u32, 4, 5),
-				("etc-usdt".as_bytes().to_vec(), "etcusdt".as_bytes().to_vec(), 2u32, 4, 5),
-				("eos-usdt".as_bytes().to_vec(), "eosusdt".as_bytes().to_vec(), 2u32, 4, 5),
-				("dash-usdt".as_bytes().to_vec(), "dashusdt".as_bytes().to_vec(), 2u32, 4, 5),
-				("comp-usdt".as_bytes().to_vec(), "compusdt".as_bytes().to_vec(), 2u32, 4, 5),
-				("matic-usdt".as_bytes().to_vec(), "maticusdt".as_bytes().to_vec(), 2u32, 4, 5),
-
-				("doge-usdt".as_bytes().to_vec(), "dogeusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("luna-usdt".as_bytes().to_vec(), "lunausdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("ftt-usdt".as_bytes().to_vec(), "fttusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("xlm-usdt".as_bytes().to_vec(), "xlmusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("vet-usdt".as_bytes().to_vec(), "vetusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("icp-usdt".as_bytes().to_vec(), "icpusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("theta-usdt".as_bytes().to_vec(), "thetausdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("algo-usdt".as_bytes().to_vec(), "algousdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("xmr-usdt".as_bytes().to_vec(), "xmrusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("xtz-usdt".as_bytes().to_vec(), "xtzusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("egld-usdt".as_bytes().to_vec(), "egldusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("axs-usdt".as_bytes().to_vec(), "axsusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("iota-usdt".as_bytes().to_vec(), "iotausdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("ftm-usdt".as_bytes().to_vec(), "ftmusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("ksm-usdt".as_bytes().to_vec(), "ksmusdt".as_bytes().to_vec(), 2u32, 4, 4),
-				("hbar-usdt".as_bytes().to_vec(), "hbarusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("neo-usdt".as_bytes().to_vec(), "neousdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("waves-usdt".as_bytes().to_vec(), "wavesusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("mkr-usdt".as_bytes().to_vec(), "mkrusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("near-usdt".as_bytes().to_vec(), "nearusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("btt-usdt".as_bytes().to_vec(), "bttusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("chz-usdt".as_bytes().to_vec(), "chzusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("stx-usdt".as_bytes().to_vec(), "stxusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("dcr-usdt".as_bytes().to_vec(), "dcrusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("xem-usdt".as_bytes().to_vec(), "xemusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("omg-usdt".as_bytes().to_vec(), "omgusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("zec-usdt".as_bytes().to_vec(), "zecusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("sushi-usdt".as_bytes().to_vec(), "sushiusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("enj-usdt".as_bytes().to_vec(), "enjusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("mana-usdt".as_bytes().to_vec(), "manausdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("yfi-usdt".as_bytes().to_vec(), "yfiusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("iost-usdt".as_bytes().to_vec(), "iostusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("qtum-usdt".as_bytes().to_vec(), "qtumusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("bat-usdt".as_bytes().to_vec(), "batusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("zil-usdt".as_bytes().to_vec(), "zilusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("icx-usdt".as_bytes().to_vec(), "icxusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("grt-usdt".as_bytes().to_vec(), "grtusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("celo-usdt".as_bytes().to_vec(), "celousdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("zen-usdt".as_bytes().to_vec(), "zenusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("ren-usdt".as_bytes().to_vec(), "renusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("sc-usdt".as_bytes().to_vec(), "scusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("zrx-usdt".as_bytes().to_vec(), "zrxusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("ont-usdt".as_bytes().to_vec(), "ontusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("nano-usdt".as_bytes().to_vec(), "nanousdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("crv-usdt".as_bytes().to_vec(), "crvusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("bnt-usdt".as_bytes().to_vec(), "bntusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("fet-usdt".as_bytes().to_vec(), "fetusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("uma-usdt".as_bytes().to_vec(), "umausdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("iotx-usdt".as_bytes().to_vec(), "iotxusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("lrc-usdt".as_bytes().to_vec(), "lrcusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("sand-usdt".as_bytes().to_vec(), "sandusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("srm-usdt".as_bytes().to_vec(), "srmusdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("1inch-usdt".as_bytes().to_vec(), "1inch-usdt".as_bytes().to_vec(), 2u32, 4, 4),
-				("kava-usdt".as_bytes().to_vec(), "kavausdt".as_bytes().to_vec(), 2u32, 4, 8),
-				("knc-usdt".as_bytes().to_vec(), "kncusdt".as_bytes().to_vec(), 2u32, 4, 8),
-			],
-		},
+		// ocw_module: OCWModuleConfig {
+		// 	_phantom: Default::default(),
+		// 	request_base: Vec::new(),
+		// 	price_pool_depth: 3u32,
+		// 	price_allowable_offset: 10u8,
+		// 	price_requests: vec![
+		// 		// price_key, request_uri, parse_version, fraction_num, request interval
+		// 		("btc-usdt".as_bytes().to_vec(), "btcusdt".as_bytes().to_vec(), 2u32, 4, 2),
+		// 		("eth-usdt".as_bytes().to_vec(), "ethusdt".as_bytes().to_vec(), 2u32, 4, 2),
+		// 		("dot-usdt".as_bytes().to_vec(), "dotusdt".as_bytes().to_vec(), 2u32, 4, 2),
+		// 		("link-usdt".as_bytes().to_vec(), "linkusdt".as_bytes().to_vec(), 2u32, 4, 2),
+		//
+		// 		("ada-usdt".as_bytes().to_vec(), "adausdt".as_bytes().to_vec(), 2u32, 4, 4),
+		// 		("xrp-usdt".as_bytes().to_vec(), "xrpusdt".as_bytes().to_vec(), 2u32, 4, 4),
+		// 		("sol-usdt".as_bytes().to_vec(), "solusdt".as_bytes().to_vec(), 2u32, 4, 4),
+		// 		("uni-usdt".as_bytes().to_vec(), "uniusdt".as_bytes().to_vec(), 2u32, 4, 4),
+		// 		("bnb-usdt".as_bytes().to_vec(), "bnbusdt".as_bytes().to_vec(), 2u32, 4, 4),
+		// 		("1inch-usdt".as_bytes().to_vec(), "1INCHusdt".as_bytes().to_vec(), 2u32, 4, 4),
+		// 		("atom-usdt".as_bytes().to_vec(), "atomusdt".as_bytes().to_vec(), 2u32, 4, 4),
+		// 		("trx-usdt".as_bytes().to_vec(), "trxusdt".as_bytes().to_vec(), 2u32, 4, 4),
+		// 		("aave-usdt".as_bytes().to_vec(), "aaveusdt".as_bytes().to_vec(), 2u32, 4, 4),
+		// 		("snx-usdt".as_bytes().to_vec(), "snxusdt".as_bytes().to_vec(), 2u32, 4, 4),
+		//
+		// 		("avax-usdt".as_bytes().to_vec(), "avaxusdt".as_bytes().to_vec(), 2u32, 4, 5),
+		// 		("ltc-usdt".as_bytes().to_vec(), "ltcusdt".as_bytes().to_vec(), 2u32, 4, 5),
+		// 		("bch-usdt".as_bytes().to_vec(), "bchusdt".as_bytes().to_vec(), 2u32, 4, 5),
+		// 		("fil-usdt".as_bytes().to_vec(), "filusdt".as_bytes().to_vec(), 2u32, 4, 5),
+		// 		("etc-usdt".as_bytes().to_vec(), "etcusdt".as_bytes().to_vec(), 2u32, 4, 5),
+		// 		("eos-usdt".as_bytes().to_vec(), "eosusdt".as_bytes().to_vec(), 2u32, 4, 5),
+		// 		("dash-usdt".as_bytes().to_vec(), "dashusdt".as_bytes().to_vec(), 2u32, 4, 5),
+		// 		("comp-usdt".as_bytes().to_vec(), "compusdt".as_bytes().to_vec(), 2u32, 4, 5),
+		// 		("matic-usdt".as_bytes().to_vec(), "maticusdt".as_bytes().to_vec(), 2u32, 4, 5),
+		//
+		// 		("doge-usdt".as_bytes().to_vec(), "dogeusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("luna-usdt".as_bytes().to_vec(), "lunausdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("ftt-usdt".as_bytes().to_vec(), "fttusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("xlm-usdt".as_bytes().to_vec(), "xlmusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("vet-usdt".as_bytes().to_vec(), "vetusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("icp-usdt".as_bytes().to_vec(), "icpusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("theta-usdt".as_bytes().to_vec(), "thetausdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("algo-usdt".as_bytes().to_vec(), "algousdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("xmr-usdt".as_bytes().to_vec(), "xmrusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("xtz-usdt".as_bytes().to_vec(), "xtzusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("egld-usdt".as_bytes().to_vec(), "egldusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("axs-usdt".as_bytes().to_vec(), "axsusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("iota-usdt".as_bytes().to_vec(), "iotausdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("ftm-usdt".as_bytes().to_vec(), "ftmusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("ksm-usdt".as_bytes().to_vec(), "ksmusdt".as_bytes().to_vec(), 2u32, 4, 4),
+		// 		("hbar-usdt".as_bytes().to_vec(), "hbarusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("neo-usdt".as_bytes().to_vec(), "neousdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("waves-usdt".as_bytes().to_vec(), "wavesusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("mkr-usdt".as_bytes().to_vec(), "mkrusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("near-usdt".as_bytes().to_vec(), "nearusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("btt-usdt".as_bytes().to_vec(), "bttusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("chz-usdt".as_bytes().to_vec(), "chzusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("stx-usdt".as_bytes().to_vec(), "stxusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("dcr-usdt".as_bytes().to_vec(), "dcrusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("xem-usdt".as_bytes().to_vec(), "xemusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("omg-usdt".as_bytes().to_vec(), "omgusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("zec-usdt".as_bytes().to_vec(), "zecusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("sushi-usdt".as_bytes().to_vec(), "sushiusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("enj-usdt".as_bytes().to_vec(), "enjusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("mana-usdt".as_bytes().to_vec(), "manausdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("yfi-usdt".as_bytes().to_vec(), "yfiusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("iost-usdt".as_bytes().to_vec(), "iostusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("qtum-usdt".as_bytes().to_vec(), "qtumusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("bat-usdt".as_bytes().to_vec(), "batusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("zil-usdt".as_bytes().to_vec(), "zilusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("icx-usdt".as_bytes().to_vec(), "icxusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("grt-usdt".as_bytes().to_vec(), "grtusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("celo-usdt".as_bytes().to_vec(), "celousdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("zen-usdt".as_bytes().to_vec(), "zenusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("ren-usdt".as_bytes().to_vec(), "renusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("sc-usdt".as_bytes().to_vec(), "scusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("zrx-usdt".as_bytes().to_vec(), "zrxusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("ont-usdt".as_bytes().to_vec(), "ontusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("nano-usdt".as_bytes().to_vec(), "nanousdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("crv-usdt".as_bytes().to_vec(), "crvusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("bnt-usdt".as_bytes().to_vec(), "bntusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("fet-usdt".as_bytes().to_vec(), "fetusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("uma-usdt".as_bytes().to_vec(), "umausdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("iotx-usdt".as_bytes().to_vec(), "iotxusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("lrc-usdt".as_bytes().to_vec(), "lrcusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("sand-usdt".as_bytes().to_vec(), "sandusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("srm-usdt".as_bytes().to_vec(), "srmusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("1inch-usdt".as_bytes().to_vec(), "1inch-usdt".as_bytes().to_vec(), 2u32, 4, 4),
+		// 		("kava-usdt".as_bytes().to_vec(), "kavausdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 		("knc-usdt".as_bytes().to_vec(), "kncusdt".as_bytes().to_vec(), 2u32, 4, 8),
+		// 	],
+		// },
 	}
 }
 
@@ -477,19 +492,6 @@ fn shell_testnet_genesis(parachain_id: ParaId) -> shell_runtime::GenesisConfig {
 	}
 }
 
-use statemint_common::Balance as StatemintBalance;
-use sc_telemetry::serde_json;
-
-/// Specialized `ChainSpec` for the normal parachain runtime.
-pub type StatemintChainSpec = sc_service::GenericChainSpec<statemint_runtime::GenesisConfig, Extensions>;
-pub type StatemineChainSpec = sc_service::GenericChainSpec<statemine_runtime::GenesisConfig, Extensions>;
-pub type WestmintChainSpec = sc_service::GenericChainSpec<westmint_runtime::GenesisConfig, Extensions>;
-
-const STATEMINT_ED: StatemintBalance = statemint_runtime::constants::currency::EXISTENTIAL_DEPOSIT;
-const STATEMINE_ED: StatemintBalance = statemine_runtime::constants::currency::EXISTENTIAL_DEPOSIT;
-const WESTMINT_ED: StatemintBalance = westmint_runtime::constants::currency::EXISTENTIAL_DEPOSIT;
-const AMAS_ED: rococo_parachain_runtime::constants::currency::CurrencyBalance =
-	rococo_parachain_runtime::constants::currency::EXISTENTIAL_DEPOSIT;
 
 /// Helper function to generate a crypto pair from seed
 pub fn get_pair_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {

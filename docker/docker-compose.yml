@@ -7,7 +7,7 @@ services:
       - "9933:9933"
       - "9944:9944"
     volumes:
-      - "polkadot-data-alice:/data"
+      - "polkadot-data.will.del-alice:/data.will.del"
       - type: bind
         source: ./test/parachain/res/polkadot_chainspec.json
         target: /chainspec.json
@@ -36,7 +36,7 @@ services:
       - "9935:9933"
       - "9945:9944"
     volumes:
-      - "polkadot-data-bob:/data"
+      - "polkadot-data.will.del-bob:/data.will.del"
       - type: bind
         source: ./test/parachain/res/polkadot_chainspec.json
         target: /chainspec.json
@@ -64,7 +64,7 @@ services:
       dockerfile: ./docker/test-parachain-collator.dockerfile
     image: "ctpc:latest"
     volumes:
-      - "genesis-state:/data"
+      - "genesis-state:/data.will.del"
     command: >
       polkadot-collator
       export-genesis-state
@@ -77,7 +77,7 @@ services:
       target: collator
     image: "ctpc:collator"
     volumes:
-      - "collator-data:/data"
+      - "collator-data.will.del:/data.will.del"
     depends_on:
       - node_alice
       - node_bob

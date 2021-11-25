@@ -1,5 +1,5 @@
 use super::*;
-use pallet_ocw;
+use ares_oracle;
 use sp_runtime::{traits, MultiAddress};
 use sp_runtime::generic::Era;
 use frame_support::pallet_prelude::Encode;
@@ -11,7 +11,7 @@ use frame_support::sp_runtime::RuntimeAppPublic;
 use frame_support::sp_runtime::generic::SignedPayload;
 // use crate::part_collective::TechnicalCollective;
 use frame_support::sp_runtime::app_crypto::sp_core::u32_trait::{_1, _2};
-pub use pallet_ocw::LOCAL_STORAGE_PRICE_REQUEST_DOMAIN;
+pub use ares_oracle::LOCAL_STORAGE_PRICE_REQUEST_DOMAIN;
 
 // pub type EnsureRootOrHalfTechnicalCollective = EnsureOneOf<
 //     AccountId,
@@ -19,7 +19,7 @@ pub use pallet_ocw::LOCAL_STORAGE_PRICE_REQUEST_DOMAIN;
 //     pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, TechnicalCollective>,
 // >;
 
-impl pallet_ocw::aura_handler::Config for Runtime {}
+impl ares_oracle::aura_handler::Config for Runtime {}
 
 parameter_types! {
 	pub const UnsignedPriority: u64 = 1 << 20;
@@ -28,11 +28,11 @@ parameter_types! {
 	pub const CalculationKind: u8 = 1;
 }
 
-impl pallet_ocw::Config for Runtime {
+impl ares_oracle::Config for Runtime {
     type Event = Event;
     type Call = Call;
-    type AuthorityId = pallet_ocw::crypto::OcwAuthId<Self>;
-    type AuthorityAres = pallet_ocw::crypto::AuthorityId;
+    type AuthorityId = ares_oracle::crypto::OcwAuthId<Self>;
+    type AuthorityAres = ares_oracle::crypto::AuthorityId;
     // type CheckDeposit = AresChallenge;
     // type UnsignedInterval = UnsignedInterval;
     type UnsignedPriority = UnsignedPriority;
@@ -49,7 +49,7 @@ impl pallet_ocw::Config for Runtime {
     type ValidatorAuthority = <Self as frame_system::Config>::AccountId;
     // type VMember = StakingExtend;
     type VMember = MemberExtend;
-    type AuthorityCount = pallet_ocw::aura_handler::Pallet<Runtime>;
+    type AuthorityCount = ares_oracle::aura_handler::Pallet<Runtime>;
     type OcwFinanceHandler = OcwFinance;
 }
 
@@ -58,7 +58,7 @@ impl pallet_ocw::Config for Runtime {
 /// registering account-ID of that session key index.
 pub struct OcwFindAccountFromAuthorIndex<T, Inner>(sp_std::marker::PhantomData<(T, Inner)>);
 
-impl<T: pallet_ocw::Config, Inner: FindAuthor<AuraId>> FindAuthor<T::AccountId>
+impl<T: ares_oracle::Config, Inner: FindAuthor<AuraId>> FindAuthor<T::AccountId>
 for OcwFindAccountFromAuthorIndex<T, Inner>
     where
         sp_runtime::AccountId32: From<<T as frame_system::Config>::AccountId>,
@@ -112,7 +112,7 @@ impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for R
             pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
         );
 
-        // TODO::Sign one of your own data, the signed data is called raw_payload
+        // TODO::Sign one of your own data.will.del, the signed data.will.del is called raw_payload
         let raw_payload = SignedPayload::new(call, extra)
             .map_err(|e| {
                 log::warn!("Unable to create signed payload: {:?}", e);
@@ -187,7 +187,7 @@ impl<C> frame_system::offchain::SendTransactionTypes<C> for Runtime
 //             pallet_transaction_payment::ChargeTransactionPayment::<Runtime>::from(tip),
 //         );
 //
-//         // TODO::Sign one of your own data, the signed data is called raw_payload
+//         // TODO::Sign one of your own data.will.del, the signed data.will.del is called raw_payload
 //         let raw_payload = SignedPayload::new(call, extra)
 //             .map_err(|e| {
 //                 log::warn!("Unable to create signed payload: {:?}", e);

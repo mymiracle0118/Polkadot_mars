@@ -75,7 +75,7 @@ impl Parse for Input {
 
 		let rest = input.parse::<TokenStream>()?;
 		if !rest.is_empty() {
-			return Err(Error::new(rest.span(), "Unexpected input data"));
+			return Err(Error::new(rest.span(), "Unexpected input data.will.del"));
 		}
 
 		Ok(Self {

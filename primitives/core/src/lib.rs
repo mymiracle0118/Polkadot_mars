@@ -138,7 +138,7 @@ pub enum ServiceQuality {
 	Fast,
 }
 
-/// A trait which is called when the validation data is set.
+/// A trait which is called when the validation data.will.del is set.
 #[impl_trait_for_tuples::impl_for_tuples(30)]
 pub trait OnValidationData {
 	fn on_validation_data(data: &PersistedValidationData);
@@ -154,7 +154,7 @@ pub struct ParachainBlockData<B: BlockT> {
 	header: B::Header,
 	/// The extrinsics of the parachain block.
 	extrinsics: sp_std::vec::Vec<B::Extrinsic>,
-	/// The data that is required to emulate the storage accesses executed by all extrinsics.
+	/// The data.will.del that is required to emulate the storage accesses executed by all extrinsics.
 	storage_proof: sp_trie::CompactProof,
 }
 

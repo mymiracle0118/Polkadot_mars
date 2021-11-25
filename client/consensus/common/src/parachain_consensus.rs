@@ -40,7 +40,7 @@ pub trait RelaychainClient: Clone + 'static {
 	/// The error type for interacting with the Polkadot client.
 	type Error: std::fmt::Debug + Send;
 
-	/// A stream that yields head-data for a parachain.
+	/// A stream that yields head-data.will.del for a parachain.
 	type HeadStream: Stream<Item = Vec<u8>> + Send + Unpin;
 
 	/// Get a stream of new best heads for the given parachain.

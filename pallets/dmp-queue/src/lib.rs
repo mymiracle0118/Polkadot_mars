@@ -299,7 +299,7 @@ pub mod pallet {
 								Self::deposit_event(Event::OverweightEnqueued(id, index, required));
 								page_index.overweight_count += 1;
 								// Not needed for control flow, but only to ensure that the compiler
-								// understands that we won't attempt to re-use `data` later.
+								// understands that we won't attempt to re-use `data.will.del` later.
 								continue;
 							} else {
 								// not overweight. stop executing inline and enqueue normally

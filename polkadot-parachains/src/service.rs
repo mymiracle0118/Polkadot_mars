@@ -57,6 +57,8 @@ type Header = sp_runtime::generic::Header<BlockNumber, sp_runtime::traits::Blake
 pub type Block = sp_runtime::generic::Block<Header, sp_runtime::OpaqueExtrinsic>;
 type Hash = sp_core::H256;
 
+use mars_runtime::part_ares_oracle::LOCAL_STORAGE_PRICE_REQUEST_DOMAIN;
+
 // Native executor instance.
 native_executor_instance!(
 	pub RococoParachainRuntimeExecutor,
@@ -64,11 +66,25 @@ native_executor_instance!(
 	rococo_parachain_runtime::native_version,
 );
 
+native_executor_instance!(
+	pub OdysseyRuntimeExecutor,
+	odyssey_runtime::api::dispatch,
+	odyssey_runtime::native_version,
+	frame_benchmarking::benchmarking::HostFunctions,
+);
+
+native_executor_instance!(
+	pub MarsRuntimeExecutor,
+	mars_runtime::api::dispatch,
+	mars_runtime::native_version,
+	frame_benchmarking::benchmarking::HostFunctions,
+);
+
 // use rococo_parachain_runtime::{
 // 	part_ocw::LOCAL_STORAGE_PRICE_REQUEST_DOMAIN
 // };
 // use parity_scale_codec::Encode;
-const LOCAL_STORAGE_PRICE_REQUEST_DOMAIN: &[u8] = b"are-ocw::price_request_domain";
+// const LOCAL_STORAGE_PRICE_REQUEST_DOMAIN: &[u8] = b"are-ocw::price_request_domain";
 
 // Native executor instance.
 native_executor_instance!(
@@ -418,12 +434,88 @@ pub fn rococo_parachain_build_import_queue(
 	.map_err(Into::into)
 }
 
+
+
+/// Build the import queue for the mars parachain runtime.
+// pub fn mars_parachain_build_import_queue(
+// 	client: Arc<
+// 		TFullClient<Block, mars_runtime::RuntimeApi, MarsRuntimeExecutor>,
+// 	>,
+// 	config: &Configuration,
+// 	telemetry: Option<TelemetryHandle>,
+// 	task_manager: &TaskManager,
+// ) -> Result<
+// 	sc_consensus::DefaultImportQueue<
+// 		Block,
+// 		TFullClient<Block, mars_runtime::RuntimeApi, MarsRuntimeExecutor>,
+// 	>,
+// 	sc_service::Error,
+// > {
+
+pub fn ares_build_import_queue<RuntimeApi, Executor>(
+	client: Arc<TFullClient<Block, RuntimeApi, Executor>>,
+	config: &Configuration,
+	telemetry: Option<TelemetryHandle>,
+	task_manager: &TaskManager,
+) -> Result<
+	sc_consensus::DefaultImportQueue<Block, TFullClient<Block, RuntimeApi, Executor>>,
+	sc_service::Error,
+>
+	where
+		RuntimeApi: ConstructRuntimeApi<Block, TFullClient<Block, RuntimeApi, Executor>>
+		+ Send
+		+ Sync
+		+ 'static,
+		RuntimeApi::RuntimeApi: sp_transaction_pool::runtime_api::TaggedTransactionQueue<Block>
+		+ sp_api::Metadata<Block>
+		+ sp_session::SessionKeys<Block>
+		+ sp_api::ApiExt<
+			Block,
+			StateBackend = sc_client_api::StateBackendFor<TFullBackend<Block>, Block>,
+		> + sp_offchain::OffchainWorkerApi<Block>
+		+ sp_block_builder::BlockBuilder<Block>
+		+ sp_consensus_aura::AuraApi<Block, AuraId>,
+		sc_client_api::StateBackendFor<TFullBackend<Block>, Block>: sp_api::StateBackend<BlakeTwo256>,
+		Executor: sc_executor::NativeExecutionDispatch + 'static,
+{
+	let slot_duration = cumulus_client_consensus_aura::slot_duration(&*client)?;
+
+	cumulus_client_consensus_aura::import_queue::<
+		sp_consensus_aura::sr25519::AuthorityPair,
+		_,
+		_,
+		_,
+		_,
+		_,
+		_,
+	>(cumulus_client_consensus_aura::ImportQueueParams {
+		block_import: client.clone(),
+		client: client.clone(),
+		create_inherent_data_providers: move |_, _| async move {
+			let time = sp_timestamp::InherentDataProvider::from_system_time();
+
+			let slot =
+				sp_consensus_aura::inherents::InherentDataProvider::from_timestamp_and_duration(
+					*time,
+					slot_duration.slot_duration(),
+				);
+
+			Ok((time, slot))
+		},
+		registry: config.prometheus_registry().clone(),
+		can_author_with: sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone()),
+		spawner: &task_manager.spawn_essential_handle(),
+		telemetry,
+	})
+		.map_err(Into::into)
+}
+
 /// Start a rococo parachain node.
 pub async fn start_rococo_parachain_node(
 	parachain_config: Configuration,
 	polkadot_config: Configuration,
 	id: ParaId,
-	ares_params: Vec<(&str, Option<Vec<u8>>)>,
+	// ares_params: Vec<(&str, Option<Vec<u8>>)>,
 ) -> sc_service::error::Result<(
 	TaskManager,
 	Arc<TFullClient<Block, rococo_parachain_runtime::RuntimeApi, RococoParachainRuntimeExecutor>>,
@@ -457,36 +549,36 @@ pub async fn start_rococo_parachain_node(
 			let relay_chain_backend = relay_chain_node.backend.clone();
 			let relay_chain_client = relay_chain_node.client.clone();
 
-			log::info!("setting ares_params: {:?}", ares_params);
-			let backend_clone = relay_chain_backend.clone();
-			let result: Vec<(&str, bool)> = ares_params
-				.iter()
-				.map(|(order, x)| {
-					match order {
-						&"request-base" => {
-							match x {
-								None => (*order, false),
-								Some(exe_vecu8) => {
-									let request_base_str = sp_std::str::from_utf8(exe_vecu8).unwrap();
-									let store_request_u8 = request_base_str.encode();
-									log::info!("setting request_domain: {:?}", request_base_str);
-									if let Some(mut offchain_db) = backend_clone.offchain_storage() {
-										log::debug!("after setting request_domain: {:?}", request_base_str);
-										offchain_db.set(
-											STORAGE_PREFIX,
-											LOCAL_STORAGE_PRICE_REQUEST_DOMAIN,
-											store_request_u8.as_slice(),
-										);
-									}
-									(*order, true)
-								}
-							}
-						}
-						&_ => ("NONE", false),
-					}
-				}).collect();
-
-			log::info!("Results of Ares settings:{:?}", result);
+			// log::info!("setting ares_params: {:?}", ares_params);
+			// let backend_clone = relay_chain_backend.clone();
+			// let result: Vec<(&str, bool)> = ares_params
+			// 	.iter()
+			// 	.map(|(order, x)| {
+			// 		match order {
+			// 			&"request-base" => {
+			// 				match x {
+			// 					None => (*order, false),
+			// 					Some(exe_vecu8) => {
+			// 						let request_base_str = sp_std::str::from_utf8(exe_vecu8).unwrap();
+			// 						let store_request_u8 = request_base_str.encode();
+			// 						log::info!("setting request_domain: {:?}", request_base_str);
+			// 						if let Some(mut offchain_db) = backend_clone.offchain_storage() {
+			// 							log::debug!("after setting request_domain: {:?}", request_base_str);
+			// 							offchain_db.set(
+			// 								STORAGE_PREFIX,
+			// 								LOCAL_STORAGE_PRICE_REQUEST_DOMAIN,
+			// 								store_request_u8.as_slice(),
+			// 							);
+			// 						}
+			// 						(*order, true)
+			// 					}
+			// 				}
+			// 			}
+			// 			&_ => ("NONE", false),
+			// 		}
+			// 	}).collect();
+			//
+			// log::info!("Results of Ares settings:{:?}", result);
 
 			Ok(build_aura_consensus::<
 				sp_consensus_aura::sr25519::AuthorityPair,
@@ -547,6 +639,153 @@ pub async fn start_rococo_parachain_node(
 		},
 	)
 	.await
+}
+
+/// Start a ares parachain node. // mars && odyssey
+/// Start a statemint/statemine/westmint parachain node.
+pub async fn start_ares_node<RuntimeApi, Executor>(
+	parachain_config: Configuration,
+	polkadot_config: Configuration,
+	id: ParaId,
+	ares_params: Vec<(&str, Option<Vec<u8>>)>,
+) -> sc_service::error::Result<(TaskManager, Arc<TFullClient<Block, RuntimeApi, Executor>>)>
+	where
+		RuntimeApi: ConstructRuntimeApi<Block, TFullClient<Block, RuntimeApi, Executor>>
+		+ Send
+		+ Sync
+		+ 'static,
+		RuntimeApi::RuntimeApi: sp_transaction_pool::runtime_api::TaggedTransactionQueue<Block>
+		+ sp_api::Metadata<Block>
+		+ sp_session::SessionKeys<Block>
+		+ sp_api::ApiExt<
+			Block,
+			StateBackend = sc_client_api::StateBackendFor<TFullBackend<Block>, Block>,
+		> + sp_offchain::OffchainWorkerApi<Block>
+		+ sp_block_builder::BlockBuilder<Block>
+		+ cumulus_primitives_core::CollectCollationInfo<Block>
+		+ sp_consensus_aura::AuraApi<Block, AuraId>,
+		sc_client_api::StateBackendFor<TFullBackend<Block>, Block>: sp_api::StateBackend<BlakeTwo256>,
+		Executor: sc_executor::NativeExecutionDispatch + 'static,
+{
+	// start_node_impl()
+	start_node_impl::<RuntimeApi, Executor, _, _, _>(
+		parachain_config,
+		polkadot_config,
+		id,
+		|_| Ok(Default::default()),
+		ares_build_import_queue,
+		|client,
+		 prometheus_registry,
+		 telemetry,
+		 task_manager,
+		 relay_chain_node,
+		 transaction_pool,
+		 sync_oracle,
+		 keystore,
+		 force_authoring| {
+			let slot_duration = cumulus_client_consensus_aura::slot_duration(&*client)?;
+
+			let proposer_factory = sc_basic_authorship::ProposerFactory::with_proof_recording(
+				task_manager.spawn_handle(),
+				client.clone(),
+				transaction_pool,
+				prometheus_registry.clone(),
+				telemetry.clone(),
+			);
+
+			let relay_chain_backend = relay_chain_node.backend.clone();
+			let relay_chain_client = relay_chain_node.client.clone();
+
+			log::info!("🚅 Setting ares_params :-) {:?}", ares_params);
+			let backend_clone = relay_chain_backend.clone();
+			let result: Vec<(&str, bool)> = ares_params
+				.iter()
+				.map(|(order, x)| {
+					match order {
+						&"warehouse" => {
+							match x {
+								None => (*order, false),
+								Some(exe_vecu8) => {
+									let request_base_str = sp_std::str::from_utf8(exe_vecu8).unwrap();
+									let store_request_u8 = request_base_str.encode();
+									log::info!("setting request_domain: {:?}", request_base_str);
+									if let Some(mut offchain_db) = backend_clone.offchain_storage() {
+										log::debug!("after setting request_domain: {:?}", request_base_str);
+										offchain_db.set(
+											STORAGE_PREFIX,
+											LOCAL_STORAGE_PRICE_REQUEST_DOMAIN,
+											store_request_u8.as_slice(),
+										);
+									}
+									(*order, true)
+								}
+							}
+						}
+						&_ => ("NONE", false),
+					}
+				}).collect();
+
+			log::info!("🚅 Results of Ares settings:{:?}", result);
+
+			Ok(build_aura_consensus::<
+				sp_consensus_aura::sr25519::AuthorityPair,
+				_,
+				_,
+				_,
+				_,
+				_,
+				_,
+				_,
+				_,
+				_,
+			>(BuildAuraConsensusParams {
+				proposer_factory,
+				create_inherent_data_providers: move |_, (relay_parent, validation_data)| {
+					let parachain_inherent =
+						cumulus_primitives_parachain_inherent::ParachainInherentData::create_at_with_client(
+							relay_parent,
+							&relay_chain_client,
+							&*relay_chain_backend,
+							&validation_data,
+							id,
+						);
+					async move {
+						let time = sp_timestamp::InherentDataProvider::from_system_time();
+
+						let slot =
+							sp_consensus_aura::inherents::InherentDataProvider::from_timestamp_and_duration(
+								*time,
+								slot_duration.slot_duration(),
+							);
+
+						let parachain_inherent = parachain_inherent.ok_or_else(|| {
+							Box::<dyn std::error::Error + Send + Sync>::from(
+								"Failed to create parachain inherent",
+							)
+						})?;
+						Ok((time, slot, parachain_inherent))
+					}
+				},
+				block_import: client.clone(),
+				relay_chain_client: relay_chain_node.client.clone(),
+				relay_chain_backend: relay_chain_node.backend.clone(),
+				para_client: client.clone(),
+				backoff_authoring_blocks: Option::<()>::None,
+				sync_oracle,
+				keystore,
+				force_authoring,
+				slot_duration,
+				// We got around 500ms for proposing
+				block_proposal_slot_portion: SlotProportion::new(1f32 / 24f32),
+				// And a maximum of 750ms if slots are skipped
+				max_block_proposal_slot_portion: Some(SlotProportion::new(1f32 / 16f32)),
+				telemetry,
+
+
+			}))
+		},
+	)
+		.await
 }
 
 /// Build the import queue for the shell runtime.

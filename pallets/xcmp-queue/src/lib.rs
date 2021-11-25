@@ -118,7 +118,7 @@ pub mod pallet {
 		FailedToSend,
 		/// Bad XCM origin.
 		BadXcmOrigin,
-		/// Bad XCM data.
+		/// Bad XCM data.will.del.
 		BadXcm,
 	}
 
@@ -397,7 +397,7 @@ impl<T: Config> Pallet<T> {
 							}
 						}
 					} else {
-						debug_assert!(false, "Invalid incoming XCMP message data");
+						debug_assert!(false, "Invalid incoming XCMP message data.will.del");
 						remaining_fragments = &b""[..];
 					}
 				}
@@ -420,7 +420,7 @@ impl<T: Config> Pallet<T> {
 							}
 						}
 					} else {
-						debug_assert!(false, "Invalid incoming blob message data");
+						debug_assert!(false, "Invalid incoming blob message data.will.del");
 						remaining_fragments = &b""[..];
 					}
 				}

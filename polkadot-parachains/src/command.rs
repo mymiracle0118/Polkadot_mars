@@ -19,7 +19,7 @@ use crate::{
 	cli::{Cli, RelayChainCli, Subcommand},
 	service::{
 		StatemineRuntimeExecutor, StatemintRuntimeExecutor, WestmintRuntimeExecutor, new_partial,
-		RococoParachainRuntimeExecutor, ShellRuntimeExecutor, Block,
+		RococoParachainRuntimeExecutor, ShellRuntimeExecutor, MarsRuntimeExecutor, OdysseyRuntimeExecutor, Block,
 	},
 };
 use codec::Encode;
@@ -44,6 +44,8 @@ trait IdentifyChain {
 	fn is_statemint(&self) -> bool;
 	fn is_statemine(&self) -> bool;
 	fn is_westmint(&self) -> bool;
+	fn is_odyssey(&self) -> bool;
+	fn is_mars(&self) -> bool;
 }
 
 impl IdentifyChain for dyn sc_service::ChainSpec {
@@ -58,6 +60,12 @@ impl IdentifyChain for dyn sc_service::ChainSpec {
 	}
 	fn is_westmint(&self) -> bool {
 		self.id().starts_with("westmint")
+	}
+	fn is_odyssey(&self) -> bool {
+		self.id().starts_with("odyssey")
+	}
+	fn is_mars(&self) -> bool {
+		self.id().starts_with("mars")
 	}
 }
 
@@ -74,6 +82,12 @@ impl<T: sc_service::ChainSpec + 'static> IdentifyChain for T {
 	fn is_westmint(&self) -> bool {
 		<dyn sc_service::ChainSpec>::is_westmint(self)
 	}
+	fn is_odyssey(&self) -> bool {
+		<dyn sc_service::ChainSpec>::is_odyssey(self)
+	}
+	fn is_mars(&self) -> bool {
+		<dyn sc_service::ChainSpec>::is_mars(self)
+	}
 }
 
 fn load_spec(
@@ -81,7 +95,7 @@ fn load_spec(
 	para_id: ParaId,
 ) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
 	Ok(match id {
-		"staging" => Box::new(chain_spec::mars_test_net(para_id)),
+		// "staging" => Box::new(chain_spec::mars_test_net(para_id)),
 		"tick" => Box::new(chain_spec::ChainSpec::from_json_bytes(
 			&include_bytes!("../res/tick.json")[..],
 		)?),
@@ -110,14 +124,22 @@ fn load_spec(
 		"westmint" => Box::new(chain_spec::ChainSpec::from_json_bytes(
 			&include_bytes!("../res/westmint.json")[..],
 		)?),
-		"mars" => Box::new(chain_spec::ChainSpec::from_json_bytes(
-			&include_bytes!("../res/ares-protocol-mars2008.json")[..],
-		)?),
-		"mars-dev" => Box::new(chain_spec::mars_test_net(para_id)),
-		"odyssey" => Box::new(chain_spec::ChainSpec::from_json_bytes(
-			&include_bytes!("../res/ares-protocol-odyssey2028.json")[..],
-		)?),
-		"odyssey-dev" => Box::new(chain_spec::odyssey_test_net(para_id)),
+
+		"mars-dev" => Box::new(chain_spec::mars_development_config(para_id)),
+		"mars" => {
+			log::info!("***** LINDEBUG from_json_bytes with mars");
+			Box::new(chain_spec::MarsChainSpec::from_json_bytes(
+				&include_bytes!("../res/ares-protocol-mars-2008.json")[..],
+			)?)
+		},
+
+		"odyssey-dev" => Box::new(chain_spec::odyssey_development_config(para_id)),
+		"odyssey" => {
+			log::info!("***** LINDEBUG from_json_bytes with odyssey");
+			Box::new(chain_spec::OdysseyChainSpec::from_json_bytes(
+				&include_bytes!("../res/ares-protocol-odyssey-2028.json")[..],
+			)?)
+		} ,
 		"" => Box::new(chain_spec::get_chain_spec(para_id)),
 		// "" => Box::new(chain_spec::staging_test_net(para_id)),
 		path => {
@@ -130,6 +152,10 @@ fn load_spec(
 				Box::new(chain_spec::WestmintChainSpec::from_json_file(path.into())?)
 			} else if chain_spec.is_shell() {
 				Box::new(chain_spec::ShellChainSpec::from_json_file(path.into())?)
+			} else if chain_spec.is_mars() {
+				Box::new(chain_spec::MarsChainSpec::from_json_file(path.into())?)
+			} else if chain_spec.is_odyssey() {
+				Box::new(chain_spec::OdysseyChainSpec::from_json_file(path.into())?)
 			} else {
 				Box::new(chain_spec)
 			}
@@ -181,6 +207,10 @@ impl SubstrateCli for Cli {
 			&westmint_runtime::VERSION
 		} else if chain_spec.is_shell() {
 			&shell_runtime::VERSION
+		} else if chain_spec.is_mars() {
+			&mars_runtime::VERSION
+		} else if chain_spec.is_odyssey() {
+			&odyssey_runtime::VERSION
 		} else {
 			&rococo_parachain_runtime::VERSION
 		}
@@ -261,6 +291,24 @@ macro_rules! construct_async_run {
 		} else if runner.config().chain_spec.is_statemint() {
 			runner.async_run(|$config| {
 				let $components = new_partial::<statemint_runtime::RuntimeApi, StatemintRuntimeExecutor, _>(
+					&$config,
+					crate::service::statemint_build_import_queue,
+				)?;
+				let task_manager = $components.task_manager;
+				{ $( $code )* }.map(|v| (v, task_manager))
+			})
+		} else if runner.config().chain_spec.is_mars() {
+			runner.async_run(|$config| {
+				let $components = new_partial::<mars_runtime::RuntimeApi, StatemintRuntimeExecutor, _>(
+					&$config,
+					crate::service::statemint_build_import_queue,
+				)?;
+				let task_manager = $components.task_manager;
+				{ $( $code )* }.map(|v| (v, task_manager))
+			})
+		} else if runner.config().chain_spec.is_odyssey() {
+			runner.async_run(|$config| {
+				let $components = new_partial::<odyssey_runtime::RuntimeApi, StatemintRuntimeExecutor, _>(
 					&$config,
 					crate::service::statemint_build_import_queue,
 				)?;
@@ -400,6 +448,12 @@ pub fn run() -> Result<()> {
 					runner.sync_run(|config| cmd.run::<Block, WestmintRuntimeExecutor>(config))
 				} else if runner.config().chain_spec.is_statemint() {
 					runner.sync_run(|config| cmd.run::<Block, StatemintRuntimeExecutor>(config))
+				} else if runner.config().chain_spec.is_mars() {
+					todo!("Not implement for mars.")
+					// runner.sync_run(|config| cmd.run::<Block, StatemintRuntimeExecutor>(config))
+				} else if runner.config().chain_spec.is_odyssey() {
+					todo!("Not implement for odyssey.")
+					// runner.sync_run(|config| cmd.run::<Block, StatemintRuntimeExecutor>(config))
 				} else {
 					Err("Chain doesn't support benchmarking".into())
 				}
@@ -411,7 +465,6 @@ pub fn run() -> Result<()> {
 		}
 		None => {
 			let runner = cli.create_runner(&cli.run.normalize())?;
-
 			runner.run_node_until_exit(|config| async move {
 				let para_id =
 					chain_spec::Extensions::try_get(&*config.chain_spec).map(|e| e.para_id);
@@ -424,15 +477,16 @@ pub fn run() -> Result<()> {
 				);
 
 				let id = ParaId::from(cli.run.parachain_id.or(para_id).unwrap_or(DEFAULT_PARA_ID));
-
 				let parachain_account =
 					AccountIdConversion::<polkadot_primitives::v0::AccountId>::into_account(&id);
 
 				let block: crate::service::Block =
 					generate_genesis_block(&config.chain_spec).map_err(|e| format!("{:?}", e))?;
+
 				let genesis_state = format!("0x{:?}", HexDisplay::from(&block.header().encode()));
 
 				let task_executor = config.task_executor.clone();
+
 				let polkadot_config =
 					SubstrateCli::create_configuration(&polkadot_cli, &polkadot_cli, task_executor)
 						.map_err(|err| format!("Relay chain argument error: {}", err))?;
@@ -440,7 +494,6 @@ pub fn run() -> Result<()> {
 				info!("Parachain id: {:?}", id);
 				info!("Parachain Account: {}", parachain_account);
 				info!("Parachain genesis state: {}", genesis_state);
-				info!("LIN-DEBUG::Realchain role {} ", polkadot_config.role.to_string());
 				info!(
 					"Is collating: {}",
 					if config.role.is_authority() {
@@ -482,21 +535,28 @@ pub fn run() -> Result<()> {
 						.await
 						.map(|r| r.0)
 						.map_err(Into::into)
+				}  else if config.chain_spec.is_mars() {
+					crate::service::start_ares_node::<mars_runtime::RuntimeApi, MarsRuntimeExecutor>(
+						config,
+						polkadot_config,
+						id,
+						get_warehouse_params(cli)
+					)
+						.await
+						.map(|r| r.0)
+						.map_err(Into::into)
+				}  else if config.chain_spec.is_odyssey() {
+					crate::service::start_ares_node::<odyssey_runtime::RuntimeApi, OdysseyRuntimeExecutor>(
+						config,
+						polkadot_config,
+						id,
+						get_warehouse_params(cli)
+					)
+						.await
+						.map(|r| r.0)
+						.map_err(Into::into)
 				} else {
-
-					// ares params
-					let mut ares_params: Vec<(&str,Option<Vec<u8>>)> = Vec::new();
-					let request_base = match cli.warehouse {
-						None => {
-							panic!("⛔ Start parameter `--warehouse` is required!");
-						}
-						Some(request_url) => {
-							request_url.as_str().as_bytes().to_vec()
-						}
-					};
-					ares_params.push(("request-base", Some(request_base)));
-
-					crate::service::start_rococo_parachain_node(config, polkadot_config, id, ares_params)
+					crate::service::start_rococo_parachain_node(config, polkadot_config, id)
 						.await
 						.map(|r| r.0)
 						.map_err(Into::into)
@@ -504,6 +564,22 @@ pub fn run() -> Result<()> {
 			})
 		}
 	}
+}
+
+// Make some ares peculiar params with `Cli`, like as warehouse and ares_keys
+fn get_warehouse_params(cli: Cli) -> Vec<(&'static str,Option<Vec<u8>>)> {
+	// ares params
+	let mut ares_params: Vec<(&str,Option<Vec<u8>>)> = Vec::new();
+	let request_base = match cli.warehouse {
+		None => {
+			panic!("⛔ Start parameter `--warehouse` is required!");
+		}
+		Some(request_url) => {
+			request_url.as_str().as_bytes().to_vec()
+		}
+	};
+	ares_params.push(("warehouse", Some(request_base)));
+	ares_params
 }
 
 impl DefaultConfigurationValues for RelayChainCli {

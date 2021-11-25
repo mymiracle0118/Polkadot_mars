@@ -340,7 +340,7 @@ impl BlockTests {
 				NewValidationCode::<Test>::kill();
 
 				// It is insufficient to push the validation function params
-				// to storage; they must also be included in the inherent data.
+				// to storage; they must also be included in the inherent data.will.del.
 				let inherent_data = {
 					let mut inherent_data = InherentData::default();
 					let mut system_inherent_data = ParachainInherentData {

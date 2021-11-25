@@ -98,7 +98,7 @@ where
 }
 
 /// Collect the relevant relay chain state in form of a proof for putting it into the validation
-/// data inherent.
+/// data.will.del inherent.
 fn collect_relay_storage_proof(
 	polkadot_backend: &impl Backend<PBlock>,
 	para_id: ParaId,

@@ -16,10 +16,10 @@
 
 //! Cumulus parachain inherent
 //!
-//! The [`ParachainInherentData`] is the data that is passed by the collator to the parachain runtime.
-//! The runtime will use this data to execute messages from other parachains/the relay chain or to
-//! read data from the relay chain state. When the parachain is validated by a parachain validator on
-//! the relay chain, this data is checked for correctnes. If the data passed by the collator to the
+//! The [`ParachainInherentData`] is the data.will.del that is passed by the collator to the parachain runtime.
+//! The runtime will use this data.will.del to execute messages from other parachains/the relay chain or to
+//! read data.will.del from the relay chain state. When the parachain is validated by a parachain validator on
+//! the relay chain, this data.will.del is checked for correctnes. If the data.will.del passed by the collator to the
 //! runtime isn't correct, the parachain candidate is considered invalid.
 //!
 //! Use [`ParachainInherentData::create_at`] to create the [`ParachainInherentData`] at a given
@@ -46,13 +46,13 @@ pub use mock::MockValidationDataInherentDataProvider;
 /// The identifier for the parachain inherent.
 pub const INHERENT_IDENTIFIER: InherentIdentifier = *b"sysi1337";
 
-/// The inherent data that is passed by the collator to the parachain runtime.
+/// The inherent data.will.del that is passed by the collator to the parachain runtime.
 #[derive(codec::Encode, codec::Decode, sp_core::RuntimeDebug, Clone, PartialEq)]
 pub struct ParachainInherentData {
 	pub validation_data: PersistedValidationData,
 	/// A storage proof of a predefined set of keys from the relay-chain.
 	///
-	/// Specifically this witness contains the data for:
+	/// Specifically this witness contains the data.will.del for:
 	///
 	/// - the current slot number at the given relay parent
 	/// - active host configuration as per the relay parent,

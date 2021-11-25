@@ -40,7 +40,7 @@ pub use frame_support::{
 	traits::{Everything, IsInVec, Randomness},
 	traits::{
 		AllowAll, Currency, DenyAll, Imbalance, InstanceFilter, KeyOwnerProofSystem,
-		LockIdentifier, OnUnbalanced, U128CurrencyToVote, 
+		LockIdentifier, OnUnbalanced, U128CurrencyToVote,
 	},
 	weights::{
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
@@ -52,7 +52,7 @@ use frame_system::{EnsureOneOf, EnsureRoot};
 use frame_system::limits::{BlockLength, BlockWeights};
 pub use pallet_balances::Call as BalancesCall;
 pub use pallet_timestamp::Call as TimestampCall;
-pub use parachain_staking::{InflationInfo, Range};
+// pub use parachain_staking::{InflationInfo, Range};
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
@@ -77,25 +77,26 @@ use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 pub mod constants;
 use constants::{currency::*, time::*};
 // use constants::currency::AMAS_UNITS;//{AMAS_UNITS, AMAS_CENTS, AMAS_MILLI_UNITS, AMAS_MILLICENTS};
+// pub const AMAS_UNITS: CurrencyBalance = 1_000_000_000_000; // 1  DOLLARS
 
 mod weights;
-mod part_utility;
-mod part_authorship;
-mod part_session_and_collatorselection;
-mod part_collective;
-mod part_treasury;
-mod part_bounties;
-mod part_democracy;
-mod part_scheduler;
-mod part_multisig;
-mod part_proxy;
-mod part_vesting;
-// // mod part_price;
-// // mod part_getprice;
-
-mod part_ocw_finance;
-mod part_member_extend;
-pub mod part_ocw;
+// mod part_utility;
+// mod part_authorship;
+// mod part_session_and_collatorselection;
+// mod part_collective;
+// mod part_treasury;
+// mod part_bounties;
+// mod part_democracy;
+// mod part_scheduler;
+// mod part_multisig;
+// mod part_proxy;
+// mod part_vesting;
+// // // mod part_price;
+// // // mod part_getprice;
+//
+// mod part_oracle_finance;
+// mod part_member_extend;
+// pub mod part_ares_oracle;
 
 pub type SessionHandlers = ();
 
@@ -107,8 +108,8 @@ pub type SessionHandlers = ();
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
-/// of data like extrinsics, allowing for them to continue syncing the network through upgrades
-/// to even the core data structures.
+/// of data.will.del like extrinsics, allowing for them to continue syncing the network through upgrades
+/// to even the core data.will.del structures.
 pub mod opaque {
 	use super::*;
 	pub use sp_runtime::OpaqueExtrinsic as UncheckedExtrinsic;
@@ -575,26 +576,26 @@ construct_runtime! {
 		// Assets: pallet_assets::{Pallet, Call, Storage, Event<T>} = 32,
 
 		// Ares the order of these 4 are important and shall not change.
-		Authorship: pallet_authorship::{Pallet, Call, Storage},
-		CollatorSelection: pallet_collator_selection::{Pallet, Call, Storage, Event<T>, Config<T>},
-		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
+		// Authorship: pallet_authorship::{Pallet, Call, Storage},
+		// CollatorSelection: pallet_collator_selection::{Pallet, Call, Storage, Event<T>, Config<T>},
+		// Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
 		Aura: pallet_aura::{Pallet, Storage, Config<T>},
 		AuraExt: cumulus_pallet_aura_ext::{Pallet, Storage, Config},
 
 		// Governance
-		Democracy: pallet_democracy::{Pallet, Call, Storage, Config<T>, Event<T>},
-		Council: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
-		TechnicalCommittee: pallet_collective::<Instance2>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
-		Treasury: pallet_treasury::{Pallet, Call, Storage, Config, Event<T>},
-		Bounties: pallet_bounties::{Pallet, Call, Storage, Event<T>},
-		Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>},
-		Vesting: pallet_vesting::{Pallet, Call, Storage, Event<T>, Config<T>},
+		// Democracy: pallet_democracy::{Pallet, Call, Storage, Config<T>, Event<T>},
+		// Council: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
+		// TechnicalCommittee: pallet_collective::<Instance2>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>},
+		// Treasury: pallet_treasury::{Pallet, Call, Storage, Config, Event<T>},
+		// Bounties: pallet_bounties::{Pallet, Call, Storage, Event<T>},
+		// Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>},
+		// Vesting: pallet_vesting::{Pallet, Call, Storage, Event<T>, Config<T>},
 		// Staking: pallet_staking::{Pallet, Call, Config<T>, Storage, Event<T>},
 
 		//
-		MemberExtend: member_extend::{Pallet},
-		OcwFinance: ocw_finance::{Pallet, Call, Storage, Event<T>},
-		OCWModule: pallet_ocw::{Pallet, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
+		// MemberExtend: member_extend::{Pallet},
+		// OcwFinance: oracle_finance::{Pallet, Call, Storage, Event<T>},
+		// OCWModule: ares_oracle::{Pallet, Call, Storage, Event<T>, ValidateUnsigned, Config<T>},
 
 		// XCM helpers.
 		XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 50,
@@ -603,9 +604,9 @@ construct_runtime! {
 		DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 53,
 
 		// Handy utilities.
-		Utility: pallet_utility::{Pallet, Call, Event},
-		Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>},
-		Proxy: pallet_proxy::{Pallet, Call, Storage, Event<T>},
+		// Utility: pallet_utility::{Pallet, Call, Event},
+		// Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>},
+		// Proxy: pallet_proxy::{Pallet, Call, Storage, Event<T>},
 
 		// Spambot: cumulus_ping::{Pallet, Call, Storage, Event<T>} = 99,
 		// Price: pallet_price::{Pallet, Call, Storage, Event<T>} = 100,
@@ -627,7 +628,7 @@ pub type AccountId = <<Signature as sp_runtime::traits::Verify>::Signer as sp_ru
 pub type Balance = CurrencyBalance;
 /// Index of a transaction in the chain.
 pub type Index = u32;
-/// A hash of some data used by the chain.
+/// A hash of some data.will.del used by the chain.
 pub type Hash = sp_core::H256;
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -777,8 +778,8 @@ impl cumulus_pallet_parachain_system::CheckInherents<Block> for CheckInherents {
 				relay_chain_slot,
 				sp_std::time::Duration::from_secs(6),
 			)
-			.create_inherent_data()
-			.expect("Could not create the timestamp inherent data");
+				.create_inherent_data()
+				.expect("Could not create the timestamp inherent data.will.del");
 
 		inherent_data.check_extrinsics(&block)
 	}

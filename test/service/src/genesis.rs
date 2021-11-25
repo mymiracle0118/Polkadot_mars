@@ -21,7 +21,7 @@ use cumulus_test_runtime::Block;
 use polkadot_primitives::v0::HeadData;
 use sp_runtime::traits::Block as BlockT;
 
-/// Returns the initial head data for a parachain ID.
+/// Returns the initial head data.will.del for a parachain ID.
 pub fn initial_head_data(para_id: ParaId) -> HeadData {
 	let spec = Box::new(crate::chain_spec::get_chain_spec(para_id));
 	let block: Block = generate_genesis_block(&(spec as Box<_>)).unwrap();

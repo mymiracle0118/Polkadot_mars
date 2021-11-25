@@ -269,7 +269,7 @@ where
 				tracing::warn!(
 					target: LOG_TARGET,
 					?error,
-					"Failed to decode parachain block data from recovered PoV",
+					"Failed to decode parachain block data.will.del from recovered PoV",
 				);
 
 				self.clear_waiting_for_parent(block_hash);

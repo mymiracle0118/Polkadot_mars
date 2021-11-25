@@ -269,7 +269,7 @@ pub type Signature = sp_runtime::MultiSignature;
 pub type AccountId = <<Signature as sp_runtime::traits::Verify>::Signer as sp_runtime::traits::IdentifyAccount>::AccountId;
 /// Index of a transaction in the chain.
 pub type Index = u32;
-/// A hash of some data used by the chain.
+/// A hash of some data.will.del used by the chain.
 pub type Hash = sp_core::H256;
 /// An index to a block.
 pub type BlockNumber = u32;

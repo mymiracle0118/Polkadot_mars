@@ -20,7 +20,7 @@ use sp_inherents::{InherentData, InherentDataProvider};
 
 use cumulus_test_relay_sproof_builder::RelayStateSproofBuilder;
 
-/// Inherent data provider that supplies mocked validation data.
+/// Inherent data.will.del provider that supplies mocked validation data.will.del.
 ///
 /// This is useful when running a node that is not actually backed by any relay chain.
 /// For example when running a local node, or running integration tests.

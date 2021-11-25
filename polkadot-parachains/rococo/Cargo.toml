@@ -46,9 +46,6 @@ cumulus-pallet-dmp-queue = { path = "../../pallets/dmp-queue", default-features 
 cumulus-pallet-xcmp-queue = { path = "../../pallets/xcmp-queue", default-features = false }
 cumulus-pallet-xcm = { path = "../../pallets/xcm", default-features = false }
 cumulus-ping = { path = "../pallets/ping", default-features = false }
-#pallet-getprice = {path = '../pallets/getprice', default-features = false}
-#pallet-price = {path = '../pallets/price', default-features = false}
-parachain-staking = { path = "../pallets/parachain-staking", default-features = false }
 
 # Polkadot dependencies
 polkadot-parachain = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.9" }
@@ -56,31 +53,6 @@ xcm = { git = "https://github.com/paritytech/polkadot", default-features = false
 xcm-builder = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.9" }
 xcm-executor = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.9" }
 pallet-xcm = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.9" }
-
-pallet-authorship = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.9"  }
-pallet-session = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.9"  }
-pallet-collator-selection = { path = "../../pallets/collator-selection", default-features = false }
-
-#pallet-ocw = { default-features = false,  package = "pallet-ocw", path= "../../../ocw-suit/pallets/pallet-ocw", version = "3.2.8"}
-#ocw-finance = { default-features = false,  package = "ocw-finance", path= "../../../ocw-suit/pallets/ocw-finance", version = "3.0.4" }
-#member-extend = {default-features = false, path = '../../../ocw-suit/pallets/member-extend',  version = '3.0.3'}
-
-pallet-ocw = {default-features = false, git = 'https://github.com/aresprotocols/ocw-suit.git', branch = 'monthly-2021-09+1', version = '3.2.8'}
-ocw-finance = {default-features = false, git = 'https://github.com/aresprotocols/ocw-suit.git', branch = 'monthly-2021-09+1', version = '3.0.4'}
-member-extend = {default-features = false, git = 'https://github.com/aresprotocols/ocw-suit.git', branch = 'monthly-2021-09+1', version = '3.0.3'}
-
-# Governance
-pallet-democracy = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.9"  }
-pallet-collective = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.9"  }
-pallet-utility = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.9"  }
-pallet-treasury = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.9"  }
-pallet-bounties = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.9"  }
-pallet-scheduler = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.9"  }
-pallet-multisig = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.9"  }
-pallet-proxy = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.9"  }
-pallet-vesting = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.9"  }
-#pallet-staking = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.9"  }
-#polkadot-node-primitives = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.9" }
 
 [dev-dependencies]
 hex-literal = "0.3.1"
@@ -130,25 +102,4 @@ std = [
 	"xcm-executor/std",
 	"pallet-aura/std",
 	"sp-consensus-aura/std",
-	"pallet-collator-selection/std",
-	"pallet-authorship/std",
-	"pallet-session/std",
-	"member-extend/std",
-	"pallet-ocw/std",
-	"ocw-finance/std",
-
-#	Governance
-	"pallet-democracy/std",
-	"pallet-collective/std",
-	"pallet-utility/std",
-	"pallet-treasury/std",
-	"pallet-bounties/std",
-	"pallet-scheduler/std",
-	"pallet-multisig/std",
-	"pallet-proxy/std",
-	"pallet-vesting/std",
-#	'pallet-getprice/std',
-#	'pallet-price/std',
-	'parachain-staking/std',
-#	"pallet-staking/std",
 ]

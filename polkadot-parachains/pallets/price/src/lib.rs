@@ -12,7 +12,7 @@ pub mod pallet {
 	use cumulus_primitives_core::ParaId;
 	use cumulus_pallet_xcm::{Origin as CumulusOrigin, ensure_sibling_para};
 	use frame_support::sp_runtime::print;
-	//use pallet_ocw::getPriceBySymbol;
+	//use ares_oracle::getPriceBySymbol;
 
     #[derive(Encode, Decode, Clone, PartialEq, Eq, Default, RuntimeDebug)]
     pub struct ResPriceCall<AccountId> {
@@ -33,7 +33,7 @@ pub mod pallet {
 	}
 
 	#[pallet::config]
-	pub trait Config: frame_system::Config + pallet_ocw::Config
+	pub trait Config: frame_system::Config + ares_oracle::Config
 		where sp_runtime::AccountId32: From<<Self as frame_system::Config>::AccountId>
 	{
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
@@ -83,7 +83,7 @@ pub mod pallet {
 			let para_id = ensure_sibling_para(<T as Config>::Origin::from(origin))?;
             log::info!("para_id {:?}", para_id);
             
-			let price = pallet_ocw::Pallet::<T>::get_price_symbol(symbol.clone());
+			let price = ares_oracle::Pallet::<T>::get_price_symbol(symbol.clone());
 
 			log::info!("get price from ares:{:?}", price);
 			// emit event

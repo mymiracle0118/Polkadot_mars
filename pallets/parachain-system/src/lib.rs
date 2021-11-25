@@ -20,7 +20,7 @@
 //!
 //! This pallet handles low-level details of being a parachain. It's responsibilities include:
 //!
-//! - ingestion of the parachain validation data
+//! - ingestion of the parachain validation data.will.del
 //! - ingestion of incoming downward and lateral messages and dispatching them
 //! - coordinating upgrades with the relay-chain
 //! - communication of parachain outputs, such as sent messages, signalling an upgrade, etc.
@@ -101,7 +101,7 @@ pub mod pallet {
 		/// The overarching event type.
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
-		/// Something which can be notified when the validation data is set.
+		/// Something which can be notified when the validation data.will.del is set.
 		type OnValidationData: OnValidationData;
 
 		/// Returns the parachain ID we are running with.
@@ -291,7 +291,7 @@ pub mod pallet {
 			}
 		}
 
-		/// Set the current validation data.
+		/// Set the current validation data.will.del.
 		///
 		/// This should be invoked exactly once per block. It will panic at the finalization
 		/// phase if the call was not invoked.
@@ -429,7 +429,7 @@ pub mod pallet {
 		/// The supplied validation function has compiled into a blob larger than Polkadot is
 		/// willing to run
 		TooBig,
-		/// The inherent which supplies the validation data did not run this block
+		/// The inherent which supplies the validation data.will.del did not run this block
 		ValidationDataNotAvailable,
 		/// The inherent which supplies the host configuration did not run this block
 		HostConfigurationNotAvailable,
@@ -461,7 +461,7 @@ pub mod pallet {
 	#[pallet::getter(fn validation_data)]
 	pub(super) type ValidationData<T: Config> = StorageValue<_, PersistedValidationData>;
 
-	/// Were the validation data set to notify the relay chain?
+	/// Were the validation data.will.del set to notify the relay chain?
 	#[pallet::storage]
 	pub(super) type DidSetValidationCode<T: Config> = StorageValue<_, bool, ValueQuery>;
 
@@ -472,20 +472,20 @@ pub mod pallet {
 	/// The snapshot of some state related to messaging relevant to the current parachain as per
 	/// the relay parent.
 	///
-	/// This field is meant to be updated each block with the validation data inherent. Therefore,
-	/// before processing of the inherent, e.g. in `on_initialize` this data may be stale.
+	/// This field is meant to be updated each block with the validation data.will.del inherent. Therefore,
+	/// before processing of the inherent, e.g. in `on_initialize` this data.will.del may be stale.
 	///
-	/// This data is also absent from the genesis.
+	/// This data.will.del is also absent from the genesis.
 	#[pallet::storage]
 	#[pallet::getter(fn relevant_messaging_state)]
 	pub(super) type RelevantMessagingState<T: Config> = StorageValue<_, MessagingStateSnapshot>;
 
 	/// The parachain host configuration that was obtained from the relay parent.
 	///
-	/// This field is meant to be updated each block with the validation data inherent. Therefore,
-	/// before processing of the inherent, e.g. in `on_initialize` this data may be stale.
+	/// This field is meant to be updated each block with the validation data.will.del inherent. Therefore,
+	/// before processing of the inherent, e.g. in `on_initialize` this data.will.del may be stale.
 	///
-	/// This data is also absent from the genesis.
+	/// This data.will.del is also absent from the genesis.
 	#[pallet::storage]
 	#[pallet::getter(fn host_configuration)]
 	pub(super) type HostConfiguration<T: Config> = StorageValue<_, AbridgedHostConfiguration>;
@@ -574,7 +574,7 @@ pub mod pallet {
 				.get_data(&Self::INHERENT_IDENTIFIER)
 				.ok()
 				.flatten()
-				.expect("validation function params are always injected into inherent data; qed");
+				.expect("validation function params are always injected into inherent data.will.del; qed");
 
 			Some(Call::set_validation_data(data))
 		}
@@ -633,7 +633,7 @@ impl<T: Config> GetChannelInfo for Pallet<T> {
 	fn get_channel_status(id: ParaId) -> ChannelStatus {
 		// Note, that we are using `relevant_messaging_state` which may be from the previous
 		// block, in case this is called from `on_initialize`, i.e. before the inherent with
-		// fresh data is submitted.
+		// fresh data.will.del is submitted.
 		//
 		// That shouldn't be a problem though because this is anticipated and already can
 		// happen. This is because sending implies that a message is buffered until there is
@@ -991,7 +991,7 @@ impl<T: Config> Pallet<T> {
 		//
 		// Note, that we are using `host_configuration` here which may be from the previous
 		// block, in case this is called from `on_initialize`, i.e. before the inherent with fresh
-		// data is submitted.
+		// data.will.del is submitted.
 		//
 		// That shouldn't be a problem since this is a preliminary check and the actual check would
 		// be performed just before submitting the message from the candidate, and it already can
@@ -1041,8 +1041,8 @@ pub trait CheckInherents<Block: BlockT> {
 }
 
 /// Implements [`BlockNumberProvider`] that returns relaychain block number fetched from
-/// validation data.
-/// NTOE: When validation data is not available (e.g. within on_initialize), 0 will be returned.
+/// validation data.will.del.
+/// NTOE: When validation data.will.del is not available (e.g. within on_initialize), 0 will be returned.
 pub struct RelaychainBlockNumberProvider<T>(sp_std::marker::PhantomData<T>);
 
 impl<T: Config> BlockNumberProvider for RelaychainBlockNumberProvider<T> {

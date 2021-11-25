@@ -26,7 +26,7 @@ use sp_trie::StorageProof;
 
 /// A snapshot of some messaging related state of relay chain pertaining to the current parachain.
 ///
-/// This data is essential for making sure that the parachain is aware of current resource use on
+/// This data.will.del is essential for making sure that the parachain is aware of current resource use on
 /// the relay chain and that the candidates produced for this parachain do not exceed any of these
 /// limits.
 #[derive(Clone, Encode, Decode)]

@@ -23,7 +23,6 @@ pub fn generate_genesis_block<Block: BlockT>(
 	chain_spec: &Box<dyn ChainSpec>,
 ) -> Result<Block, String> {
 	let storage = chain_spec.build_storage()?;
-
 	let child_roots = storage.children_default.iter().map(|(sk, child_content)| {
 		let state_root = <<<Block as BlockT>::Header as HeaderT>::Hashing as HashT>::trie_root(
 			child_content.data.clone().into_iter().collect(),

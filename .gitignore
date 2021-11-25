@@ -6,7 +6,7 @@
 polkadot_argument_parsing
 **/node_modules
 
-/data
+/data.will.del
 **/*.private.md
 **/*.private.sh
 /test-relay-chain-rococo

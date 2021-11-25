@@ -275,7 +275,7 @@ construct_runtime! {
 
 /// Index of a transaction in the chain.
 pub type Index = u32;
-/// A hash of some data used by the chain.
+/// A hash of some data.will.del used by the chain.
 pub type Hash = sp_core::H256;
 /// Balance of an account.
 pub type Balance = u128;
@@ -436,7 +436,7 @@ impl cumulus_pallet_parachain_system::CheckInherents<Block> for CheckInherents {
 				cumulus_primitives_timestamp::InherentDataProvider::from_relay_chain_slot_and_duration(
 					relay_chain_slot,
 					sp_std::time::Duration::from_secs(6),
-				).create_inherent_data().expect("Could not create the timestamp inherent data");
+				).create_inherent_data().expect("Could not create the timestamp inherent data.will.del");
 
 			inherent_data.check_extrinsics(&block)
 		}

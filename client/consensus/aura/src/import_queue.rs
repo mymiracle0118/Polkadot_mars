@@ -39,7 +39,7 @@ pub struct ImportQueueParams<'a, I, C, CIDP, S, CAW> {
 	pub block_import: I,
 	/// The client to interact with the chain.
 	pub client: Arc<C>,
-	/// The inherent data providers, to create the inherent data.
+	/// The inherent data.will.del providers, to create the inherent data.will.del.
 	pub create_inherent_data_providers: CIDP,
 	/// The spawner to spawn background tasks.
 	pub spawner: &'a S,
@@ -105,7 +105,7 @@ where
 pub struct BuildVerifierParams<C, CIDP, CAW> {
 	/// The client to interact with the chain.
 	pub client: Arc<C>,
-	/// The inherent data providers, to create the inherent data.
+	/// The inherent data.will.del providers, to create the inherent data.will.del.
 	pub create_inherent_data_providers: CIDP,
 	/// Can we author with the current node?
 	pub can_author_with: CAW,

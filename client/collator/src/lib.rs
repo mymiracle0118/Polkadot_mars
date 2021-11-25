@@ -196,7 +196,7 @@ where
 				tracing::error!(
 					target: LOG_TARGET,
 					error = ?e,
-					"Could not decode the head data."
+					"Could not decode the head data.will.del."
 				);
 				return None;
 			}
@@ -233,7 +233,7 @@ where
 		};
 
 
-		// Create the parachain block data for the validators.
+		// Create the parachain block data.will.del for the validators.
 		let b = ParachainBlockData::<Block>::new(header, extrinsics, compact_proof);
 
 		tracing::info!(

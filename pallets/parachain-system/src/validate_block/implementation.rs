@@ -54,7 +54,7 @@ where
 {
 	let block_data =
 		cumulus_primitives_core::ParachainBlockData::<B>::decode(&mut &params.block_data.0[..])
-			.expect("Invalid parachain block data");
+			.expect("Invalid parachain block data.will.del");
 
 	let parent_head =
 		B::Header::decode(&mut &params.parent_head.0[..]).expect("Invalid parent head");

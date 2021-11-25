@@ -70,7 +70,7 @@ impl fmt::Display for BlockAnnounceError {
 	}
 }
 
-/// The data that we attach to a block announcement.
+/// The data.will.del that we attach to a block announcement.
 ///
 /// This will be used to prove that a header belongs to a block that is probably being backed by
 /// the relay chain.
@@ -212,9 +212,9 @@ impl TryFrom<&'_ SignedFullStatement> for BlockAnnounceData {
 /// For more information on the block announcement, see [`WaitToAnnounce`].
 ///
 /// For each block announcement that is received, the generic block announcement validation
-/// will call this validator and provides the extra data that was attached to the announcement.
-/// We call this extra data `justification`.
-/// It is expected that the attached data is a SCALE encoded [`BlockAnnounceData`]. The
+/// will call this validator and provides the extra data.will.del that was attached to the announcement.
+/// We call this extra data.will.del `justification`.
+/// It is expected that the attached data.will.del is a SCALE encoded [`BlockAnnounceData`]. The
 /// statement is checked to be a [`CompactStatement::Candidate`] and that it is signed by an active
 /// parachain validator.
 ///
@@ -302,7 +302,7 @@ where
 		Ok(candidate_receipt.map(|cr| cr.descriptor.para_head))
 	}
 
-	/// Handle a block announcement with empty data (no statement) attached to it.
+	/// Handle a block announcement with empty data.will.del (no statement) attached to it.
 	fn handle_empty_block_announce_data(
 		&self,
 		header: Block::Header,
