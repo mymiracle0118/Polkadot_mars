@@ -190,8 +190,8 @@ pub fn get_shell_chain_spec(id: ParaId) -> ShellChainSpec {
 
 pub fn mars_development_config(id: ParaId) -> MarsChainSpec {
 	MarsChainSpec::from_genesis(
-		"Ares Pc3",
-		"mars_testnet_2",
+		"Ares Pc1",
+		"mars_testnet",
 		ChainType::Live,
 		move || {
 			genesis_of_mars::mars_genesis(
