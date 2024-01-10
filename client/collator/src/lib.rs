@@ -102,23 +102,23 @@ where
 				);
 				false
 			}
-			Ok(BlockStatus::InChainWithState) => true,
-			Ok(BlockStatus::InChainPruned) => {
-				tracing::error!(
-					target: LOG_TARGET,
-					"Skipping candidate production, because block `{:?}` is already pruned!",
-					hash,
-				);
-				false
-			}
-			Ok(BlockStatus::KnownBad) => {
-				tracing::error!(
-					target: LOG_TARGET,
-					block_hash = ?hash,
-					"Block is tagged as known bad and is included in the relay chain! Skipping candidate production!",
-				);
-				false
-			}
+			// Ok(BlockStatus::InChainWithState) => true,
+			// Ok(BlockStatus::InChainPruned) => {
+			// 	tracing::error!(
+			// 		target: LOG_TARGET,
+			// 		"Skipping candidate production, because block `{:?}` is already pruned!",
+			// 		hash,
+			// 	);
+			// 	false
+			// }
+			// Ok(BlockStatus::KnownBad) => {
+			// 	tracing::error!(
+			// 		target: LOG_TARGET,
+			// 		block_hash = ?hash,
+			// 		"Block is tagged as known bad and is included in the relay chain! Skipping candidate production!",
+			// 	);
+			// 	false
+			// }
 			Ok(BlockStatus::Unknown) => {
 				if header.number().is_zero() {
 					tracing::error!(
@@ -135,15 +135,15 @@ where
 				}
 				false
 			}
-			Err(e) => {
-				tracing::error!(
-					target: LOG_TARGET,
-					block_hash = ?hash,
-					error = ?e,
-					"Failed to get block status.",
-				);
-				false
-			}
+			// Err(e) => {
+			// 	tracing::error!(
+			// 		target: LOG_TARGET,
+			// 		block_hash = ?hash,
+			// 		error = ?e,
+			// 		"Failed to get block status.",
+			// 	);
+			// 	false
+			// }
 		}
 	}
 
@@ -202,17 +202,17 @@ where
 			}
 		};
 
-		let last_head_hash = last_head.hash();
-		if !self.check_block_status(last_head_hash, &last_head) {
-			return None;
-		}
+		// let last_head_hash = last_head.hash();
+		// if !self.check_block_status(last_head_hash, &last_head) {
+		// 	return None;
+		// }
 
-		tracing::info!(
-			target: LOG_TARGET,
-			relay_parent = ?relay_parent,
-			at = ?last_head_hash,
-			"Starting collation.",
-		);
+		// tracing::info!(
+		// 	target: LOG_TARGET,
+		// 	relay_parent = ?relay_parent,
+		// 	at = ?last_head_hash,
+		// 	"Starting collation.",
+		// );
 
 		let candidate = self
 			.parachain_consensus
@@ -236,13 +236,13 @@ where
 		// Create the parachain block data.will.del for the validators.
 		let b = ParachainBlockData::<Block>::new(header, extrinsics, compact_proof);
 
-		tracing::info!(
-			target: LOG_TARGET,
-			"PoV size {{ header: {}kb, extrinsics: {}kb, storage_proof: {}kb }}",
-			b.header().encode().len() as f64 / 1024f64,
-			b.extrinsics().encode().len() as f64 / 1024f64,
-			b.storage_proof().encode().len() as f64 / 1024f64,
-		);
+		// tracing::info!(
+		// 	target: LOG_TARGET,
+		// 	"PoV size {{ header: {}kb, extrinsics: {}kb, storage_proof: {}kb }}",
+		// 	b.header().encode().len() as f64 / 1024f64,
+		// 	b.extrinsics().encode().len() as f64 / 1024f64,
+		// 	b.storage_proof().encode().len() as f64 / 1024f64,
+		// );
 
 		let block_hash = b.header().hash();
 		let collation = self.build_collation(b, block_hash)?;
